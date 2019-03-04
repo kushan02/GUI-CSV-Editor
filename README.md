@@ -2,11 +2,11 @@
 
 Screening Task for fossee fellowship 2019, IITB internship.
 
-###Technologies/Libraries to use:
+### Technologies/Libraries to use:
   1. Python
   2. PyQt/Kivy
   
-###Instructions:
+### Instructions:
 
   1. Create a Github Account or Use your existing one.
 
@@ -16,7 +16,7 @@ Screening Task for fossee fellowship 2019, IITB internship.
 
   4. The steps in “Description” below are general, minimum and mandatory guidelines. You are free to add well documented features to your application.
 
-###Description:
+### Description:
 
 Following functionalities should be present in the application.
 
@@ -48,7 +48,7 @@ User should be able to:
   
   10. Save the plot as .png file using ‘Save as png’ option under “File” menu.
   
-###Submissions:
+### Submissions:
 
   1. Create a Github Account or Use your existing one.
 
