@@ -1,7 +1,15 @@
 import sys
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QDialog
 import csv
+
+
+class ColumnLayoutDialog(QDialog):
+    def __init__(self):
+        super(ColumnLayoutDialog, self).__init__()
+        uic.loadUi('contentlayoutdialog.ui', self)
+
+        self.show()
 
 
 class CsvEditor(QMainWindow):
@@ -22,6 +30,11 @@ class CsvEditor(QMainWindow):
 
         self.btn_load_csv.clicked.connect(self.load_csv)
 
+        # Disable the column layout option and enable only when csv is loaded
+
+        self.action_column_layout.triggered.connect(self.open_column_layout_dialog)
+        self.action_column_layout.setDisabled(True)
+
         # Flag for not detecting cell state change when opening the file
         self.check_cell_change = True
         # Connect cell change function
@@ -34,6 +47,10 @@ class CsvEditor(QMainWindow):
         self.set_toolbar_plots(False)
 
         self.show()
+
+    def open_column_layout_dialog(self):
+        self.column_layout_dialog = ColumnLayoutDialog()
+        self.column_layout_dialog.setModal(True)
 
     def load_csv(self):
         # Disable cell change check to avoid crashes
@@ -76,6 +93,11 @@ class CsvEditor(QMainWindow):
             self.tabWidget.removeTab(0)
             self.tabWidget.insertTab(1, self.csv_table_tab, "Main Document")
 
+            # Enable Column Layout menu option
+            self.action_column_layout.setDisabled(False)
+
+            # TODO: Add checkbox for each column header to toogle its visibility in the table
+
     def cell_change_current(self):
         if self.check_cell_change:
             row = self.csv_data_table.currentRow()
@@ -94,10 +116,13 @@ class CsvEditor(QMainWindow):
             self.selected_columns.append(col)
         print(self.selected_columns)
 
+        # Enable plot toolbars iff exactly 2 columns are selected
         if len(self.selected_columns) == 2:
             self.set_toolbar_plots(True)
         else:
             self.set_toolbar_plots(False)
+
+        # TODO: Add delete action behaviour for individual cells, mulitple cells, columns and rows
 
     def set_toolbar_plots(self, visibility):
         self.action_toolbar_plot_scatter_points.setEnabled(visibility)

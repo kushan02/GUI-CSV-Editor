@@ -36,7 +36,7 @@
      <enum>QTabWidget::Rounded</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="movable">
      <bool>false</bool>
@@ -208,7 +208,7 @@
     <property name="title">
      <string>&amp;View</string>
     </property>
-    <addaction name="action_content_layout"/>
+    <addaction name="action_column_layout"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -225,6 +225,9 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action_toolbar_open_file"/>
+   <addaction name="action_toolbar_save_file"/>
+   <addaction name="separator"/>
    <addaction name="action_toolbar_add_data"/>
    <addaction name="action_toolbar_delete_selected"/>
    <addaction name="separator"/>
@@ -267,7 +270,7 @@
     <string>&amp;Add Data</string>
    </property>
   </action>
-  <action name="action_content_layout">
+  <action name="action_column_layout">
    <property name="text">
     <string>Column Layout</string>
    </property>
@@ -330,6 +333,36 @@
    </property>
    <property name="toolTip">
     <string>Plot Lines</string>
+   </property>
+  </action>
+  <action name="action_toolbar_save_file">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/save_icon.png</normaloff>icons/save_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save File</string>
+   </property>
+   <property name="toolTip">
+    <string>Save current table to CSV file</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="action_toolbar_open_file">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/open_file_icon.png</normaloff>icons/open_file_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open CSV File</string>
+   </property>
+   <property name="toolTip">
+    <string>Open CSV File</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
  </widget>
