@@ -28,33 +28,62 @@ class CsvEditor(QMainWindow):
         # Load the Start Page tab on application start
         self.tabWidget.setCurrentIndex(0)
 
-        self.btn_load_csv.clicked.connect(self.load_csv)
-
         # Disable the column layout option and enable only when csv is loaded
-
-        self.action_column_layout.triggered.connect(self.open_column_layout_dialog)
         self.action_column_layout.setDisabled(True)
 
         # Flag for not detecting cell state change when opening the file
         self.check_cell_change = True
-        # Connect cell change function
-        self.csv_data_table.cellChanged.connect(self.cell_change_current)
+
+        # Flag for detecting any changes made to file (unsaved state)
+        self.file_changed = False
+
+        # Disable save options before loading file
+        self.set_save_enabled(False)
+
         self.csv_data_table.setAlternatingRowColors(True)
 
-        self.csv_data_table.itemSelectionChanged.connect(self.cell_selection_changed)
-
         # Disable the plot options by default
-        self.set_toolbar_plots(False)
+        self.set_plot_options(False)
+
+        # Set all the connection of buttons, menu items, toolbar etc to corresponding functions
+        self.set_connections()
+
+        # TODO: Add implementations for adding and deleting data
+        # TODO: Add plotting implementation
 
         self.show()
+
+    def set_connections(self):
+        # Column layout dialog function
+        self.action_column_layout.triggered.connect(self.open_column_layout_dialog)
+
+        # Connect cell change function
+        self.csv_data_table.cellChanged.connect(self.cell_change_current)
+        self.csv_data_table.itemSelectionChanged.connect(self.cell_selection_changed)
+
+        # Load csv file function
+        self.action_load_file.triggered.connect(self.load_csv)
+        self.action_toolbar_open_file.triggered.connect(self.load_csv)
+        self.btn_load_csv.clicked.connect(self.load_csv)
+
+        # Save csv file function
+        self.action_toolbar_save_file.triggered.connect(self.save_file)
+        self.action_save_file.triggered.connect(self.save_file)
 
     def open_column_layout_dialog(self):
         self.column_layout_dialog = ColumnLayoutDialog()
         self.column_layout_dialog.setModal(True)
 
     def load_csv(self):
+
+        # TODO: Prompt for saving current work if new file is opened when a document is being worked on
+
         # Disable cell change check to avoid crashes
         self.check_cell_change = False
+
+        # Set the flag to no changes in current file state
+        self.file_changed = False
+        self.set_save_enabled(False)
 
         csv_file_path = QFileDialog.getOpenFileName(self, "Load CSV File", "", 'CSV(*.csv)')
 
@@ -68,7 +97,7 @@ class CsvEditor(QMainWindow):
                 csv_file_read = csv.reader(csv_file, delimiter=',', quotechar='|')
 
                 # Fetch the column headers and move the iterator to actual data
-                column_headers = next(csv_file_read)
+                self.column_headers = next(csv_file_read)
 
                 for row_data in csv_file_read:
                     row = self.csv_data_table.rowCount()
@@ -78,7 +107,7 @@ class CsvEditor(QMainWindow):
                         item = QTableWidgetItem(stuff)
                         self.csv_data_table.setItem(row, column, item)
 
-                self.csv_data_table.setHorizontalHeaderLabels(column_headers)
+                self.csv_data_table.setHorizontalHeaderLabels(self.column_headers)
 
             # Set WordWrap to True to make the cells change height according to content
             # Currently set it to false as it looks very decent and makes cell size uniform throughout
@@ -96,7 +125,30 @@ class CsvEditor(QMainWindow):
             # Enable Column Layout menu option
             self.action_column_layout.setDisabled(False)
 
-            # TODO: Add checkbox for each column header to toogle its visibility in the table
+            # TODO: Add checkbox for each column header to toggle its visibility in the table
+
+    def save_file(self):
+
+        file_save_path = QFileDialog.getSaveFileName(self, 'Save CSV', "", 'CSV(*.csv)')
+
+        if file_save_path[0]:
+            with open(file_save_path[0], 'w', newline="") as csv_file:
+                writer = csv.writer(csv_file)
+                # Add the header row explicitly
+                writer.writerow(self.column_headers)
+                for row in range(self.csv_data_table.rowCount()):
+                    row_data = []
+                    for column in range(self.csv_data_table.columnCount()):
+                        item = self.csv_data_table.item(row, column)
+                        if item is not None:
+                            row_data.append(item.text())
+                        else:
+                            row_data.append('')
+                    writer.writerow(row_data)
+
+            # Set the flag to no changes in current file state
+            self.file_changed = False
+            self.set_save_enabled(False)
 
     def cell_change_current(self):
         if self.check_cell_change:
@@ -105,6 +157,10 @@ class CsvEditor(QMainWindow):
             value = self.csv_data_table.item(row, col).text()
             print("The current cell is ", row, ", ", col)
             print("In this cell we have: ", value)
+
+            # Set the flag to changes in current file state
+            self.file_changed = True
+            self.set_save_enabled(True)
 
     def cell_selection_changed(self):
         print("selection changed")
@@ -118,16 +174,26 @@ class CsvEditor(QMainWindow):
 
         # Enable plot toolbars iff exactly 2 columns are selected
         if len(self.selected_columns) == 2:
-            self.set_toolbar_plots(True)
+            self.set_plot_options(True)
         else:
-            self.set_toolbar_plots(False)
+            self.set_plot_options(False)
 
-        # TODO: Add delete action behaviour for individual cells, mulitple cells, columns and rows
+        # TODO: Add delete action behaviour for individual cells, multiple cells, columns and rows
 
-    def set_toolbar_plots(self, visibility):
+    def set_plot_options(self, visibility):
+
+        # TODO: Add new plotting tab for each selected option
+
         self.action_toolbar_plot_scatter_points.setEnabled(visibility)
         self.action_toolbar_plot_scatter_points_lines.setEnabled(visibility)
         self.action_toolbar_plot_lines.setEnabled(visibility)
+        self.action_plot_scatter_points.setEnabled(visibility)
+        self.action_plot_scatter_points_lines.setEnabled(visibility)
+        self.action_plot_lines.setEnabled(visibility)
+
+    def set_save_enabled(self, enabled):
+        self.action_toolbar_save_file.setEnabled(enabled)
+        self.action_save_file.setEnabled(enabled)
 
 
 if __name__ == '__main__':

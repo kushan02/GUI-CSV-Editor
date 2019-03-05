@@ -188,8 +188,7 @@
     <addaction name="separator"/>
     <addaction name="action_add_data"/>
     <addaction name="separator"/>
-    <addaction name="action_save"/>
-    <addaction name="action_save_as"/>
+    <addaction name="action_save_file"/>
     <addaction name="separator"/>
     <addaction name="action_exit"/>
    </widget>
@@ -203,6 +202,9 @@
     <property name="title">
      <string>Plot</string>
     </property>
+    <addaction name="action_plot_scatter_points"/>
+    <addaction name="action_plot_scatter_points_lines"/>
+    <addaction name="action_plot_lines"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -245,7 +247,7 @@
     <string>&amp;Close</string>
    </property>
   </action>
-  <action name="action_save">
+  <action name="action_save_file">
    <property name="text">
     <string>&amp;Save</string>
    </property>
@@ -363,6 +365,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="action_plot_scatter_points">
+   <property name="text">
+    <string>Scatter Points</string>
+   </property>
+  </action>
+  <action name="action_plot_scatter_points_lines">
+   <property name="text">
+    <string>Scatter Points with Smooth Lines</string>
+   </property>
+  </action>
+  <action name="action_plot_lines">
+   <property name="text">
+    <string>Lines</string>
    </property>
   </action>
  </widget>
