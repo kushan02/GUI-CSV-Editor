@@ -203,9 +203,6 @@
     <property name="title">
      <string>Plot</string>
     </property>
-    <addaction name="actionScatter_Points"/>
-    <addaction name="actionScatter_Points_with_Smooth_lines"/>
-    <addaction name="actionLines"/>
    </widget>
    <widget class="QMenu" name="menu_View">
     <property name="title">
@@ -333,21 +330,6 @@
    </property>
    <property name="toolTip">
     <string>Plot Lines</string>
-   </property>
-  </action>
-  <action name="actionScatter_Points">
-   <property name="text">
-    <string>Scatter Points</string>
-   </property>
-  </action>
-  <action name="actionScatter_Points_with_Smooth_lines">
-   <property name="text">
-    <string>Scatter Points with Smooth lines</string>
-   </property>
-  </action>
-  <action name="actionLines">
-   <property name="text">
-    <string>Lines</string>
    </property>
   </action>
  </widget>

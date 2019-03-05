@@ -30,19 +30,10 @@ class CsvEditor(QMainWindow):
 
         self.csv_data_table.itemSelectionChanged.connect(self.cell_selection_changed)
 
+        # Disable the plot options by default
+        self.set_toolbar_plots(False)
+
         self.show()
-
-    def cell_selection_changed(self):
-        print("selection changed")
-        # Add a way to identify all the currently selected columns
-        cols = self.csv_data_table.selectionModel().selectedColumns()
-        self.selected_columns = []
-        for index in sorted(cols):
-            col = index.column()
-            self.selected_columns.append(col)
-        print(self.selected_columns)
-
-        # TODO: If two columns are selected activate the plot graph buttons
 
     def load_csv(self):
         # Disable cell change check to avoid crashes
@@ -92,6 +83,26 @@ class CsvEditor(QMainWindow):
             value = self.csv_data_table.item(row, col).text()
             print("The current cell is ", row, ", ", col)
             print("In this cell we have: ", value)
+
+    def cell_selection_changed(self):
+        print("selection changed")
+        # Add a way to identify all the currently selected columns
+        cols = self.csv_data_table.selectionModel().selectedColumns()
+        self.selected_columns = []
+        for index in sorted(cols):
+            col = index.column()
+            self.selected_columns.append(col)
+        print(self.selected_columns)
+
+        if len(self.selected_columns) == 2:
+            self.set_toolbar_plots(True)
+        else:
+            self.set_toolbar_plots(False)
+
+    def set_toolbar_plots(self, visibility):
+        self.action_toolbar_plot_scatter_points.setEnabled(visibility)
+        self.action_toolbar_plot_scatter_points_lines.setEnabled(visibility)
+        self.action_toolbar_plot_lines.setEnabled(visibility)
 
 
 if __name__ == '__main__':
