@@ -22,8 +22,23 @@ class CsvEditor(QMainWindow):
         self.check_cell_change = True
         # Connect cell change function
         self.csv_data_table.cellChanged.connect(self.cell_change_current)
+        self.csv_data_table.setAlternatingRowColors(True)
+
+        self.csv_data_table.itemSelectionChanged.connect(self.cell_selection_changed)
 
         self.show()
+
+    def cell_selection_changed(self):
+        print("selection changed")
+        # Add a way to identify all the currently selected columns
+        cols = self.csv_data_table.selectionModel().selectedColumns()
+        self.selected_columns = []
+        for index in sorted(cols):
+            col = index.column()
+            self.selected_columns.append(col)
+        print(self.selected_columns)
+
+        # TODO: If two columns are selected activate the plot graph buttons
 
     def load_csv(self):
         # Disable cell change check to avoid crashes
