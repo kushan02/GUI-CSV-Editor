@@ -181,12 +181,17 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="action_load_file"/>
     <addaction name="action_close_file"/>
     <addaction name="separator"/>
-    <addaction name="actionExit_2"/>
+    <addaction name="action_add_data"/>
+    <addaction name="separator"/>
+    <addaction name="action_save"/>
+    <addaction name="action_save_as"/>
+    <addaction name="separator"/>
+    <addaction name="action_exit"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -198,9 +203,19 @@
     <property name="title">
      <string>Plot</string>
     </property>
+    <addaction name="actionScatter_Points"/>
+    <addaction name="actionScatter_Points_with_Smooth_lines"/>
+    <addaction name="actionLines"/>
+   </widget>
+   <widget class="QMenu" name="menu_View">
+    <property name="title">
+     <string>&amp;View</string>
+    </property>
+    <addaction name="action_content_layout"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
+   <addaction name="menu_View"/>
    <addaction name="menuPlot"/>
   </widget>
   <widget class="QToolBar" name="toolBar">
@@ -213,30 +228,126 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="action_toolbar_add_data"/>
+   <addaction name="action_toolbar_delete_selected"/>
+   <addaction name="separator"/>
+   <addaction name="action_toolbar_plot_scatter_points"/>
+   <addaction name="action_toolbar_plot_scatter_points_lines"/>
+   <addaction name="action_toolbar_plot_lines"/>
   </widget>
   <action name="action_load_file">
    <property name="text">
-    <string>Load File</string>
-   </property>
-  </action>
-  <action name="actionExit">
-   <property name="text">
-    <string>Exit</string>
+    <string>&amp;Load File</string>
    </property>
   </action>
   <action name="action_close_file">
    <property name="text">
-    <string>Close File</string>
+    <string>&amp;Close</string>
    </property>
   </action>
-  <action name="actionExit_2">
+  <action name="action_save">
    <property name="text">
-    <string>Exit</string>
+    <string>&amp;Save</string>
    </property>
   </action>
   <action name="action_edit_data">
    <property name="text">
     <string>Edit Data</string>
+   </property>
+  </action>
+  <action name="action_save_as">
+   <property name="text">
+    <string>Save as</string>
+   </property>
+  </action>
+  <action name="action_exit">
+   <property name="text">
+    <string>&amp;Exit</string>
+   </property>
+  </action>
+  <action name="action_add_data">
+   <property name="text">
+    <string>&amp;Add Data</string>
+   </property>
+  </action>
+  <action name="action_content_layout">
+   <property name="text">
+    <string>Column Layout</string>
+   </property>
+  </action>
+  <action name="action_toolbar_add_data">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/add_icon.png</normaloff>icons/add_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add Data</string>
+   </property>
+   <property name="toolTip">
+    <string>Add Row to the table</string>
+   </property>
+  </action>
+  <action name="action_toolbar_delete_selected">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/delete_icon.png</normaloff>icons/delete_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Delete Selected</string>
+   </property>
+   <property name="toolTip">
+    <string>Delete Selected</string>
+   </property>
+  </action>
+  <action name="action_toolbar_plot_scatter_points">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/scatter_plot_icon.png</normaloff>icons/scatter_plot_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Scatter Points</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot Scatter Points</string>
+   </property>
+  </action>
+  <action name="action_toolbar_plot_scatter_points_lines">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/scatter_line_plot_icon.png</normaloff>icons/scatter_line_plot_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Scatter Points with Smooth Lines</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot Scatter Points with Smooth Lines</string>
+   </property>
+  </action>
+  <action name="action_toolbar_plot_lines">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/line_plot_icon.png</normaloff>icons/line_plot_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Plot Lines</string>
+   </property>
+   <property name="toolTip">
+    <string>Plot Lines</string>
+   </property>
+  </action>
+  <action name="actionScatter_Points">
+   <property name="text">
+    <string>Scatter Points</string>
+   </property>
+  </action>
+  <action name="actionScatter_Points_with_Smooth_lines">
+   <property name="text">
+    <string>Scatter Points with Smooth lines</string>
+   </property>
+  </action>
+  <action name="actionLines">
+   <property name="text">
+    <string>Lines</string>
    </property>
   </action>
  </widget>

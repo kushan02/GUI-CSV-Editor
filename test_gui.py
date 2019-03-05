@@ -7,10 +7,14 @@ import csv
 class CsvEditor(QMainWindow):
     def __init__(self):
         super(CsvEditor, self).__init__()
+        # Load the layout file created in QT Creator
         uic.loadUi('mainwindow.ui', self)
+        # This is done to ensure that the UX remains consistent (better than writing manual code for UI)
+        # and designed in optimal way using QT's own toolset
 
         self.csv_table_tab = self.main_document_tab
         self.start_page_tab = self.start_tab
+
         self.tabWidget.removeTab(1)
 
         # Load the Start Page tab on application start
