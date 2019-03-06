@@ -58,7 +58,6 @@ class CsvEditor(QMainWindow):
         self.tabWidget.removeTab(1)
 
         # TODO: Add implementations for adding and deleting data
-        # TODO: Add plotting implementation
 
         self.plot_inverted = False
         self.figure = None
@@ -100,6 +99,12 @@ class CsvEditor(QMainWindow):
 
         # Save plot function
         self.btn_save_plot.clicked.connect(self.save_plot_as_png)
+        self.action_save_plot_png.triggered.connect(self.save_plot_as_png)
+        self.action_toolbar_save_plot_png.triggered.connect(self.save_plot_as_png)
+
+        # Set plot title
+        self.plot_title = 'Plot Title'
+        self.btn_set_plot_title.clicked.connect(self.set_plot_title)
 
     def open_column_layout_dialog(self):
         self.column_layout_dialog = ColumnLayoutDialog()
@@ -216,14 +221,15 @@ class CsvEditor(QMainWindow):
 
     def set_plot_options(self, visibility):
 
-        # TODO: Add new plotting tab for each selected option
-
         self.action_toolbar_plot_scatter_points.setEnabled(visibility)
         self.action_toolbar_plot_scatter_points_lines.setEnabled(visibility)
         self.action_toolbar_plot_lines.setEnabled(visibility)
         self.action_plot_scatter_points.setEnabled(visibility)
         self.action_plot_scatter_points_lines.setEnabled(visibility)
         self.action_plot_lines.setEnabled(visibility)
+        # Enable this option only once the plot is drawn
+        self.action_save_plot_png.setEnabled(False)
+        self.action_toolbar_save_plot_png.setEnabled(False)
 
     def set_save_enabled(self, enabled):
         self.action_toolbar_save_file.setEnabled(enabled)
@@ -249,6 +255,20 @@ class CsvEditor(QMainWindow):
 
     def plot_lines(self):
         self.plot(3)
+
+    def set_plot_title(self):
+        plot_title = self.input_plot_title.text()
+        if plot_title:
+            self.plot_title = self.input_plot_title.text()
+            # Redraw the plot with given title
+            if not self.plot_inverted:
+                self.draw_plot(self.data_x_axis, self.data_y_axis, self.label_x_axis, self.label_y_axis,
+                               self.plot_inverted)
+            else:
+                self.draw_plot(self.data_y_axis, self.data_x_axis, self.label_y_axis, self.label_x_axis,
+                               self.plot_inverted)
+        else:
+            QMessageBox.about(self, "Error!", "Please enter a title to set in the plot")
 
     def plot(self, plotType):
 
@@ -307,8 +327,7 @@ class CsvEditor(QMainWindow):
         self.figure.tight_layout()
         self.figure.subplots_adjust(left=0.1, right=0.9, bottom=0.3, top=0.9)
 
-        # TODO: Add lineEdit for taking input for plot title
-        self.figure.suptitle("Some title text")
+        self.figure.suptitle(self.plot_title)
 
         ax = self.figure.add_subplot(111)
 
@@ -327,19 +346,17 @@ class CsvEditor(QMainWindow):
             print("plotType = 3")
             ax.scatter(data_x_axis, data_y_axis)
 
-        # ax.scatter(boys_grades, girls_grades, color='b')
         self.canvas.draw()
+        # Enable the option as plot is now drawn
+        self.action_save_plot_png.setEnabled(True)
+        self.action_toolbar_save_plot_png.setEnabled(True)
 
     def save_plot_as_png(self):
 
-        file_choices = "PNG (*.png)|*.png"
-        path, ext = QFileDialog.getSaveFileName(self, 'Save file', '', file_choices)
-        path = path.encode('utf-8')
-        if not path[-4:] == file_choices[-4:].encode('utf-8'):
-            path += file_choices[-4:].encode('utf-8')
+        file_save_path = QFileDialog.getSaveFileName(self, 'Save Plot PNG', "", "PNG (*.png)|*.png")
 
-        if path:
-            self.figure.savefig(path.decode(), bbox_inches='tight')
+        if file_save_path[0]:
+            self.figure.savefig(file_save_path[0], bbox_inches='tight')
             QMessageBox.about(self, "Success!", "Your plot has been saved as png image successfully.")
 
     def close_plot_tab(self):

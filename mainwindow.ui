@@ -185,7 +185,7 @@
        <item>
         <widget class="QPushButton" name="btn_save_plot">
          <property name="text">
-          <string>Save Plot</string>
+          <string>Save Plot PNG</string>
          </property>
         </widget>
        </item>
@@ -208,6 +208,23 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="input_plot_title">
+         <property name="maxLength">
+          <number>50</number>
+         </property>
+         <property name="placeholderText">
+          <string>Plot Title</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btn_set_plot_title">
+         <property name="text">
+          <string>Set Title</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QRadioButton" name="radio_plot_xy">
@@ -265,6 +282,7 @@
     <addaction name="action_add_data"/>
     <addaction name="separator"/>
     <addaction name="action_save_file"/>
+    <addaction name="action_save_plot_png"/>
     <addaction name="separator"/>
     <addaction name="action_exit"/>
    </widget>
@@ -312,6 +330,7 @@
    <addaction name="action_toolbar_plot_scatter_points"/>
    <addaction name="action_toolbar_plot_scatter_points_lines"/>
    <addaction name="action_toolbar_plot_lines"/>
+   <addaction name="action_toolbar_save_plot_png"/>
   </widget>
   <action name="action_load_file">
    <property name="text">
@@ -456,6 +475,23 @@
   <action name="action_plot_lines">
    <property name="text">
     <string>Lines</string>
+   </property>
+  </action>
+  <action name="action_save_plot_png">
+   <property name="text">
+    <string>Save Plot as PNG</string>
+   </property>
+  </action>
+  <action name="action_toolbar_save_plot_png">
+   <property name="icon">
+    <iconset>
+     <normaloff>icons/save_plot_png_icon.png</normaloff>icons/save_plot_png_icon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Save Plot PNG</string>
+   </property>
+   <property name="toolTip">
+    <string>Save Plot as PNG image</string>
    </property>
   </action>
  </widget>
