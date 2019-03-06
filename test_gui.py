@@ -30,10 +30,6 @@ class CsvEditor(QMainWindow):
         self.start_page_tab = self.start_tab
         self.plot_page_tab = self.plot_tab
 
-        # Remove plot and start page tab
-        self.tabWidget.removeTab(2)
-        self.tabWidget.removeTab(1)
-
         # Load the Start Page tab on application start
         self.tabWidget.setCurrentIndex(0)
 
@@ -57,10 +53,17 @@ class CsvEditor(QMainWindow):
         # Set all the connection of buttons, menu items, toolbar etc to corresponding functions
         self.set_connections()
 
+        # Remove plot and file page tab
+        self.tabWidget.removeTab(2)
+        self.tabWidget.removeTab(1)
+
         # TODO: Add implementations for adding and deleting data
         # TODO: Add plotting implementation
 
-        self.plot()
+        self.plot_inverted = False
+        self.figure = None
+
+        # self.plot([1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12], "Student", "Roll number")
 
         self.show()
 
@@ -80,6 +83,23 @@ class CsvEditor(QMainWindow):
         # Save csv file function
         self.action_toolbar_save_file.triggered.connect(self.save_file)
         self.action_save_file.triggered.connect(self.save_file)
+
+        # Radiobox for plotting axes flipped or not
+        self.radio_plot_xy.toggled.connect(self.flip_plot_axes)
+
+        # Plot toolbar functions
+        self.action_toolbar_plot_scatter_points.triggered.connect(self.plot_scatter_points)
+        self.action_toolbar_plot_scatter_points_lines.triggered.connect(self.plot_scatter_points_lines)
+        self.action_toolbar_plot_lines.triggered.connect(self.plot_lines)
+        self.action_plot_scatter_points.triggered.connect(self.plot_scatter_points)
+        self.action_plot_scatter_points_lines.triggered.connect(self.plot_scatter_points_lines)
+        self.action_plot_lines.triggered.connect(self.plot_lines)
+
+        # Close plot function
+        self.btn_close_plot.clicked.connect(self.close_plot_tab)
+
+        # Save plot function
+        self.btn_save_plot.clicked.connect(self.save_plot_as_png)
 
     def open_column_layout_dialog(self):
         self.column_layout_dialog = ColumnLayoutDialog()
@@ -221,43 +241,113 @@ class CsvEditor(QMainWindow):
         # QCloseEvent.ignore()
         # self.close_application()
 
-    def plot(self):
+    def plot_scatter_points(self):
+        self.plot(1)
 
-        # TODO: Make plot function cleaner with 3 different plotting options
-        # TODO: Add option to toggle between plotting (x,y) or (y,x) to flip the axes
+    def plot_scatter_points_lines(self):
+        self.plot(2)
+
+    def plot_lines(self):
+        self.plot(3)
+
+    def plot(self, plotType):
+
         # TODO: Implement save as png feature
 
-        # self.plot_tab = QWidget()
-        layout = QHBoxLayout()
+        # TODO: Find a way to implement the scatter with smooth lines plot
 
-        self.figure = plt.figure()
-        self.canvas = FigureCanvas(self.figure)
+        # Build plotting data
+        # TODO: Try to improve time complexity of the building up of plotting data
+        self.data_x_axis = []
+        self.data_y_axis = []
+        for i in range(0, self.csv_data_table.rowCount()):
+            value = self.csv_data_table.item(i, self.selected_columns[0]).text()
+            self.data_x_axis.append(value)
+            value = self.csv_data_table.item(i, self.selected_columns[1]).text()
+            self.data_y_axis.append(value)
 
-        layout.addWidget(self.canvas)
+        self.label_x_axis = self.csv_data_table.horizontalHeaderItem(self.selected_columns[0]).text()
+        self.label_y_axis = self.csv_data_table.horizontalHeaderItem(self.selected_columns[1]).text()
+        print(self.data_x_axis, self.data_y_axis)
 
-        # self.plot_tab.setLayout(layout)
-        # self.plot_page_tab.plot_frame.setLayout(layout)
-        self.plot_frame.addWidget(self.canvas)
-        self.tabWidget.insertTab(1, self.plot_page_tab, "Plot")
+        # Avoid duplication of resources if already allocated
+        if self.figure is None:
+            self.figure = plt.figure()
+            self.canvas = FigureCanvas(self.figure)
 
+            self.plot_frame_horizontal.addStretch()
+            self.plot_frame_horizontal.addWidget(self.canvas)
+            self.plot_frame_horizontal.addStretch()
+
+        # Ensures only 2 tabs at max are open at a time - file and plot tabs respectively
+        if self.tabWidget.count() == 1:
+            self.tabWidget.insertTab(1, self.plot_page_tab, "Plot")
+
+        self.tabWidget.setCurrentIndex(1)
+
+        # Set plot type (1,2,3 => order according to scatter, scatter-line, line)
+        self.plotType = plotType
+
+        self.draw_plot(self.data_x_axis, self.data_y_axis, self.label_x_axis, self.label_y_axis, self.plot_inverted)
+
+    def flip_plot_axes(self):
+        self.plot_inverted = not self.plot_inverted
+        print("invert = ", self.plot_inverted)
+        if not self.plot_inverted:
+            self.draw_plot(self.data_x_axis, self.data_y_axis, self.label_x_axis, self.label_y_axis, self.plot_inverted)
+        else:
+            self.draw_plot(self.data_y_axis, self.data_x_axis, self.label_y_axis, self.label_x_axis, self.plot_inverted)
+
+    def draw_plot(self, data_x_axis, data_y_axis, label_x_axis, label_y_axis, flipped=False):
+
+        # Flipped tells us whether to invert the current x, y axis
         self.figure.clear()
 
         # Fix for plot having cutoff text or labels
         self.figure.tight_layout()
-        self.figure.subplots_adjust(left=0.25, right=0.9, bottom=0.3, top=0.9)
+        self.figure.subplots_adjust(left=0.1, right=0.9, bottom=0.3, top=0.9)
+
+        # TODO: Add lineEdit for taking input for plot title
+        self.figure.suptitle("Some title text")
 
         ax = self.figure.add_subplot(111)
 
         # Add another argument fontsize = 10 to change the fontsize of the labels
-        ax.set_xlabel("X LABEL")
-        ax.set_ylabel("Y LABEL")
-        girls_grades = ['abcs', 'abcs', 'abcs', 'abcsdf', 'abcasdasdas', 'abcaewass', 'abcssasad']
-        boys_grades = ['xxabcs', 'xxabcs', 'xcs', 'axxxbcsdf', 'xabcs', 'axbcaewass', 'abxd']
 
-        ax.plot(girls_grades, boys_grades)
+        ax.set_xlabel(label_x_axis)
+        ax.set_ylabel(label_y_axis)
+
+        if self.plotType == 1:
+            print("plotType = 1")
+            ax.plot(data_x_axis, data_y_axis)
+        elif self.plotType == 2:
+            print("plotType = 2")
+            ax.plot(data_x_axis, data_y_axis)
+        else:
+            print("plotType = 3")
+            ax.scatter(data_x_axis, data_y_axis)
 
         # ax.scatter(boys_grades, girls_grades, color='b')
         self.canvas.draw()
+
+    def save_plot_as_png(self):
+
+        file_choices = "PNG (*.png)|*.png"
+        path, ext = QFileDialog.getSaveFileName(self, 'Save file', '', file_choices)
+        path = path.encode('utf-8')
+        if not path[-4:] == file_choices[-4:].encode('utf-8'):
+            path += file_choices[-4:].encode('utf-8')
+
+        if path:
+            self.figure.savefig(path.decode(), bbox_inches='tight')
+            QMessageBox.about(self, "Success!", "Your plot has been saved as png image successfully.")
+
+    def close_plot_tab(self):
+        # Temporary tab reference is kept to avoid garbage collection of the UI of tab
+        tmp_tab_reference = self.plot_page_tab
+        self.tabWidget.removeTab(1)
+        self.tabWidget.setCurrentIndex(0)
+        self.plot_page_tab = tmp_tab_reference
 
 
 if __name__ == '__main__':

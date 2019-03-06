@@ -209,6 +209,23 @@
          </property>
         </spacer>
        </item>
+       <item>
+        <widget class="QRadioButton" name="radio_plot_xy">
+         <property name="text">
+          <string>Plot (x,y)</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="radio_plot_yx">
+         <property name="text">
+          <string>Plot (y,x)</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
      <widget class="QWidget" name="verticalLayoutWidget_3">
@@ -220,7 +237,11 @@
         <height>301</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="plot_frame"/>
+      <layout class="QVBoxLayout" name="plot_frame">
+       <item>
+        <layout class="QHBoxLayout" name="plot_frame_horizontal"/>
+       </item>
+      </layout>
      </widget>
     </widget>
    </widget>
