@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QDialog, QMessageBox
 import csv
 
 
@@ -76,7 +76,8 @@ class CsvEditor(QMainWindow):
 
     def load_csv(self):
 
-        # TODO: Prompt for saving current work if new file is opened when a document is being worked on
+        if self.file_changed:
+            self.prompt_save_before_closing()
 
         # Disable cell change check to avoid crashes
         self.check_cell_change = False
@@ -150,6 +151,8 @@ class CsvEditor(QMainWindow):
             self.file_changed = False
             self.set_save_enabled(False)
 
+            QMessageBox.about(self, "Success!", "Your file has been saved successfully.")
+
     def cell_change_current(self):
         if self.check_cell_change:
             row = self.csv_data_table.currentRow()
@@ -194,6 +197,18 @@ class CsvEditor(QMainWindow):
     def set_save_enabled(self, enabled):
         self.action_toolbar_save_file.setEnabled(enabled)
         self.action_save_file.setEnabled(enabled)
+
+    def prompt_save_before_closing(self):
+        if self.file_changed:
+            choice = QMessageBox.question(self, 'Save File', "Do you want to save file before quiting?",
+                                          QMessageBox.Yes | QMessageBox.No)
+            if choice == QMessageBox.Yes:
+                self.save_file()
+
+    def closeEvent(self, QCloseEvent):
+        self.prompt_save_before_closing()
+        # QCloseEvent.ignore()
+        # self.close_application()
 
 
 if __name__ == '__main__':
