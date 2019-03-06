@@ -100,7 +100,7 @@ class CsvEditor(QMainWindow):
         print("inside the change function")
         # self.test_btn = QPushButton("TEST BTN")
         self.another_widget.show()
-        #self.central_widget.setCurrentWidget(self.another_widget)
+        # self.central_widget.setCurrentWidget(self.another_widget)
 
     def home(self):
         # REQUIRED TO SHOW THE WINDOW
@@ -108,7 +108,6 @@ class CsvEditor(QMainWindow):
         self.setCentralWidget(self.start_page_widget)
 
         self.another_widget = StartPage1()
-
 
         # self.show()
 

@@ -1,7 +1,13 @@
+import random
 import sys
 from PyQt5 import uic
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QDialog, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QDialog, \
+    QMessageBox, QWidget, QVBoxLayout, QHBoxLayout
 import csv
+
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
+import matplotlib.pyplot as plt
 
 
 class ColumnLayoutDialog(QDialog):
@@ -22,7 +28,10 @@ class CsvEditor(QMainWindow):
 
         self.csv_table_tab = self.main_document_tab
         self.start_page_tab = self.start_tab
+        self.plot_page_tab = self.plot_tab
 
+        # Remove plot and start page tab
+        self.tabWidget.removeTab(2)
         self.tabWidget.removeTab(1)
 
         # Load the Start Page tab on application start
@@ -50,6 +59,8 @@ class CsvEditor(QMainWindow):
 
         # TODO: Add implementations for adding and deleting data
         # TODO: Add plotting implementation
+
+        self.plot()
 
         self.show()
 
@@ -209,6 +220,44 @@ class CsvEditor(QMainWindow):
         self.prompt_save_before_closing()
         # QCloseEvent.ignore()
         # self.close_application()
+
+    def plot(self):
+
+        # TODO: Make plot function cleaner with 3 different plotting options
+        # TODO: Add option to toggle between plotting (x,y) or (y,x) to flip the axes
+        # TODO: Implement save as png feature
+
+        # self.plot_tab = QWidget()
+        layout = QHBoxLayout()
+
+        self.figure = plt.figure()
+        self.canvas = FigureCanvas(self.figure)
+
+        layout.addWidget(self.canvas)
+
+        # self.plot_tab.setLayout(layout)
+        # self.plot_page_tab.plot_frame.setLayout(layout)
+        self.plot_frame.addWidget(self.canvas)
+        self.tabWidget.insertTab(1, self.plot_page_tab, "Plot")
+
+        self.figure.clear()
+
+        # Fix for plot having cutoff text or labels
+        self.figure.tight_layout()
+        self.figure.subplots_adjust(left=0.25, right=0.9, bottom=0.3, top=0.9)
+
+        ax = self.figure.add_subplot(111)
+
+        # Add another argument fontsize = 10 to change the fontsize of the labels
+        ax.set_xlabel("X LABEL")
+        ax.set_ylabel("Y LABEL")
+        girls_grades = ['abcs', 'abcs', 'abcs', 'abcsdf', 'abcasdasdas', 'abcaewass', 'abcssasad']
+        boys_grades = ['xxabcs', 'xxabcs', 'xcs', 'axxxbcsdf', 'xabcs', 'axbcaewass', 'abxd']
+
+        ax.plot(girls_grades, boys_grades)
+
+        # ax.scatter(boys_grades, girls_grades, color='b')
+        self.canvas.draw()
 
 
 if __name__ == '__main__':
