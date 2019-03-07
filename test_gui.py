@@ -9,6 +9,10 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
 
+# Below two libraries are used to plot the smooth curve
+from scipy.interpolate import make_interp_spline
+import numpy as np
+
 
 class ColumnLayoutDialog(QDialog):
     def __init__(self):
@@ -340,8 +344,33 @@ class CsvEditor(QMainWindow):
             print("plotType = 1")
             ax.plot(data_x_axis, data_y_axis)
         elif self.plotType == 2:
+
+            # SMOOTH CURVE CURRENTLY WORKS ONLY WIHT INTEGRAL VALUES
+            # TODO: Understand in a better way what exactly is expected in smooth curve plotting
+
             print("plotType = 2")
-            ax.plot(data_x_axis, data_y_axis)
+            # Smoothen the curve points
+            for i in range(0, len(data_x_axis)):
+                data_x_axis[i] = int(data_x_axis[i])
+                data_y_axis[i] = int(data_y_axis[i])
+
+            print(data_x_axis, data_y_axis)
+
+            data_x_axis = sorted(data_x_axis)
+            data_y_axis = sorted(data_y_axis)
+
+            T = np.array(data_x_axis)
+            power = np.array(data_y_axis)
+
+            xnew = np.linspace(T.min(), T.max(), 300)  # 300 represents number of points to make between T.min and T.max
+
+            spl = make_interp_spline(T, power, k=3)  # BSpline object
+            power_smooth = spl(xnew)
+
+            ax.plot(xnew, power_smooth)
+
+            # ax.plot(data_x_axis, data_y_axis)
+
         else:
             print("plotType = 3")
             ax.scatter(data_x_axis, data_y_axis)
