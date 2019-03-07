@@ -25,9 +25,7 @@ class ColumnLayoutDialog(QDialog):
 
         # self.show()
 
-    def add_header_visible_options(self, header_list, visible_list, obj_ref):
-
-        self.obj_ref = obj_ref
+    def add_header_visible_options(self, header_list, visible_list):
 
         layout = QVBoxLayout()
         for header in header_list:
@@ -54,8 +52,6 @@ class ColumnLayoutDialog(QDialog):
         print(self.visible_headers_list)
 
         # TODO: Find a way to update the checklist changes back to the UI
-
-        self.obj_ref.hide_invsible_headers()
 
     def get_visible_header_list(self):
         return self.get_visible_header_list
@@ -217,25 +213,41 @@ class CsvEditor(QMainWindow):
             self.csv_data_table.item(r, c).setText('')
 
     def open_column_layout_dialog(self):
+
+        # Create a new instance iff required, else save resources
         if self.column_visibility_dialog_reference is None:
             print("HEADERS", self.column_headers)
             self.column_visibility_dialog_reference = ColumnLayoutDialog()
-            # self.column_visibility_dialog_reference.add_header_visible_options(self.column_headers_all,
-            #                                                                    self.column_headers)
-            # self.column_visibility_dialog_reference.setModal(True)
 
-        self.column_visibility_dialog_reference.add_header_visible_options(self.column_headers_all, self.column_headers,
-                                                                           self)
+        self.column_visibility_dialog_reference.add_header_visible_options(self.column_headers_all, self.column_headers)
         self.column_visibility_dialog_reference.setModal(True)
-        self.column_visibility_dialog_reference.show()
+
+        # invoke exec_() method instead of show to block the main thread till the selection is done
+        self.column_visibility_dialog_reference.exec_()
+
+        # Now hide the invisible headers
+        self.hide_invisible_headers()
 
     def hide_invisible_headers(self):
         print("HIDE: ", self.column_headers)
+        # Hide all the non selected columns
+        col_index = 0
+        for header in self.column_headers_all:
+            if header in self.column_headers:
+                self.csv_data_table.setColumnHidden(col_index, False)
+                self.file_changed = True
+                self.set_save_enabled(True)
+            else:
+                self.csv_data_table.setColumnHidden(col_index, True)
+            col_index = col_index + 1
 
     def load_csv(self):
 
-        if self.file_changed:
-            self.prompt_save_before_closing()
+        # if self.file_changed:
+        #     self.prompt_save_before_closing()
+
+        # Close any already opened file if any
+        self.close_file()
 
         # Disable cell change check to avoid crashes
         self.check_cell_change = False
@@ -304,6 +316,11 @@ class CsvEditor(QMainWindow):
                 for row in range(self.csv_data_table.rowCount()):
                     row_data = []
                     for column in range(self.csv_data_table.columnCount()):
+
+                        # Check if the current column is set to be visible, if not skip it
+                        if self.csv_data_table.isColumnHidden(column):
+                            continue
+
                         item = self.csv_data_table.item(row, column)
                         if item is not None:
                             row_data.append(item.text())
@@ -318,13 +335,18 @@ class CsvEditor(QMainWindow):
             QMessageBox.about(self, "Success!", "Your file has been saved successfully.")
 
     def cell_change_current(self):
-        if self.check_cell_change:
-            row = self.csv_data_table.currentRow()
-            col = self.csv_data_table.currentColumn()
-            value = self.csv_data_table.item(row, col).text()
-            print("The current cell is ", row, ", ", col)
-            print("In this cell we have: ", value)
 
+        # Add exception handling for case when new row is added to unmodified file
+        try:
+            if self.check_cell_change:
+                row = self.csv_data_table.currentRow()
+                col = self.csv_data_table.currentColumn()
+                value = self.csv_data_table.item(row, col).text()
+                print("The current cell is ", row, ", ", col)
+                print("In this cell we have: ", value)
+        except:
+            pass
+        finally:
             # Set the flag to changes in current file state
             self.file_changed = True
             self.set_save_enabled(True)
@@ -423,6 +445,7 @@ class CsvEditor(QMainWindow):
 
         # If user selected not to save changes, in this case var wont change to false withing prompt funtion
         self.file_changed = False
+        self.set_save_enabled(False)
 
         # TODO: Add a way to open Start page tab again
 

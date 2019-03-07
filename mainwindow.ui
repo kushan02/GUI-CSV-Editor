@@ -370,7 +370,7 @@
   </action>
   <action name="action_column_layout">
    <property name="text">
-    <string>Column Layout</string>
+    <string>Show/Hide Columns</string>
    </property>
   </action>
   <action name="action_toolbar_add_data">
