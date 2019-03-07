@@ -63,8 +63,6 @@ class CsvEditor(QMainWindow):
         self.tabWidget.removeTab(2)
         self.tabWidget.removeTab(1)
 
-        # TODO: Add implementations for adding and deleting data
-
         self.plot_inverted = False
         self.figure = None
 
@@ -129,7 +127,7 @@ class CsvEditor(QMainWindow):
             self.csv_data_table.setItem(last_row_count, empty_col, item)
 
     def delete_selection(self):
-        # TODO: Delete the selected cell
+        # TODO: Add undo, redo etc functionality
         # If whole column is selected remove that column completely
         # If whole row is selected remove that row completely
         # Else make the selected cells blank
@@ -276,8 +274,6 @@ class CsvEditor(QMainWindow):
             self.set_plot_options(True)
         else:
             self.set_plot_options(False)
-
-        # TODO: Add delete action behaviour for individual cells, multiple cells, columns and rows
 
     def set_plot_options(self, visibility):
 
