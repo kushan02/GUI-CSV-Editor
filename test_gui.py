@@ -2,7 +2,7 @@ import random
 import sys
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QDialog, \
-    QMessageBox, QWidget, QVBoxLayout, QHBoxLayout
+    QMessageBox, QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QFrame
 import csv
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -19,7 +19,46 @@ class ColumnLayoutDialog(QDialog):
         super(ColumnLayoutDialog, self).__init__()
         uic.loadUi('contentlayoutdialog.ui', self)
 
-        self.show()
+        self.visible_headers_list = []
+
+        self.btn_save_header_view.clicked.connect(self.save_header_list)
+
+        # self.show()
+
+    def add_header_visible_options(self, header_list, visible_list, obj_ref):
+
+        self.obj_ref = obj_ref
+
+        layout = QVBoxLayout()
+        for header in header_list:
+            check_box = QCheckBox(header)
+            if self.visible_headers_list:
+                if header in self.visible_headers_list:
+                    check_box.setChecked(True)
+                else:
+                    check_box.setChecked(False)
+            else:
+                check_box.setChecked(True)
+            layout.addWidget(check_box)
+
+        self.column_layout_list_scroll_area.setLayout(layout)
+        self.visible_headers_list = visible_list
+
+    def save_header_list(self):
+        self.visible_headers_list.clear()
+
+        check_box_list = self.column_layout_list_scroll_area.findChildren(QCheckBox)
+        for loop in range(len(check_box_list)):
+            if check_box_list[loop].isChecked():
+                self.visible_headers_list.append(check_box_list[loop].text())
+        print(self.visible_headers_list)
+
+        # TODO: Find a way to update the checklist changes back to the UI
+
+        self.obj_ref.hide_invsible_headers()
+
+    def get_visible_header_list(self):
+        return self.get_visible_header_list
 
 
 class CsvEditor(QMainWindow):
@@ -41,6 +80,11 @@ class CsvEditor(QMainWindow):
         self.action_column_layout.setEnabled(False)
         # Disable add data option and enable only when csv is loaded
         self.action_add_data.setEnabled(False)
+        self.action_toolbar_add_data.setEnabled(False)
+        self.action_edit_data.setEnabled(False)
+        self.action_delete_selected.setEnabled(False)
+        self.action_toolbar_delete_selected.setEnabled(False)
+        self.action_close_file.setEnabled(False)
 
         # Flag for not detecting cell state change when opening the file
         self.check_cell_change = True
@@ -65,6 +109,8 @@ class CsvEditor(QMainWindow):
 
         self.plot_inverted = False
         self.figure = None
+
+        self.column_visibility_dialog_reference = None
 
         # self.plot([1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12], "Student", "Roll number")
 
@@ -112,11 +158,17 @@ class CsvEditor(QMainWindow):
 
         # Add data function
         self.action_add_data.triggered.connect(self.add_blank_data_row)
+        self.action_toolbar_add_data.triggered.connect(self.add_blank_data_row)
 
         # Delete data function
         self.action_toolbar_delete_selected.triggered.connect(self.delete_selection)
+        self.action_delete_selected.triggered.connect(self.delete_selection)
 
-        # TODO: Add functionality to close file which would open the start page again
+        # Edit data menu item function
+        self.action_edit_data.triggered.connect(self.edit_current_cell)
+
+        # Close file function
+        self.action_close_file.triggered.connect(self.close_file)
 
     def add_blank_data_row(self):
         last_row_count = self.csv_data_table.rowCount()
@@ -125,6 +177,14 @@ class CsvEditor(QMainWindow):
         for empty_col in range(0, column_count):
             item = QTableWidgetItem('')
             self.csv_data_table.setItem(last_row_count, empty_col, item)
+
+    def edit_current_cell(self):
+        cells = self.csv_data_table.selectionModel().selectedIndexes()
+        if len(cells) == 1:
+            for cell in sorted(cells):
+                r = cell.row()
+                c = cell.column()
+                self.csv_data_table.editItem(self.csv_data_table.item(r, c))
 
     def delete_selection(self):
         # TODO: Add undo, redo etc functionality
@@ -157,8 +217,20 @@ class CsvEditor(QMainWindow):
             self.csv_data_table.item(r, c).setText('')
 
     def open_column_layout_dialog(self):
-        self.column_layout_dialog = ColumnLayoutDialog()
-        self.column_layout_dialog.setModal(True)
+        if self.column_visibility_dialog_reference is None:
+            print("HEADERS", self.column_headers)
+            self.column_visibility_dialog_reference = ColumnLayoutDialog()
+            # self.column_visibility_dialog_reference.add_header_visible_options(self.column_headers_all,
+            #                                                                    self.column_headers)
+            # self.column_visibility_dialog_reference.setModal(True)
+
+        self.column_visibility_dialog_reference.add_header_visible_options(self.column_headers_all, self.column_headers,
+                                                                           self)
+        self.column_visibility_dialog_reference.setModal(True)
+        self.column_visibility_dialog_reference.show()
+
+    def hide_invisible_headers(self):
+        print("HIDE: ", self.column_headers)
 
     def load_csv(self):
 
@@ -186,6 +258,9 @@ class CsvEditor(QMainWindow):
                 # Fetch the column headers and move the iterator to actual data
                 self.column_headers = next(csv_file_read)
 
+                # A backup to keep a list of all the headers to toogle their view later
+                self.column_headers_all = self.column_headers[:]
+
                 for row_data in csv_file_read:
                     row = self.csv_data_table.rowCount()
                     self.csv_data_table.insertRow(row)
@@ -212,6 +287,8 @@ class CsvEditor(QMainWindow):
             # Enable Column Layout menu option
             self.action_column_layout.setEnabled(True)
             self.action_add_data.setEnabled(True)
+            self.action_toolbar_add_data.setEnabled(True)
+            self.action_close_file.setEnabled(True)
 
             # TODO: Add checkbox for each column header to toggle its visibility in the table
 
@@ -253,7 +330,22 @@ class CsvEditor(QMainWindow):
             self.set_save_enabled(True)
 
     def cell_selection_changed(self):
-        print("selection changed")
+
+        # Enable Edit Cell menu if a single cell is selection else disable it
+        cells_selected = self.csv_data_table.selectionModel().selectedIndexes()
+        if len(cells_selected) == 1:
+            self.action_edit_data.setEnabled(True)
+        else:
+            self.action_edit_data.setEnabled(False)
+
+        # Enable delete options iff 1 or more cells are selected
+        if len(cells_selected) >= 1:
+            self.action_delete_selected.setEnabled(True)
+            self.action_toolbar_delete_selected.setEnabled(True)
+        else:
+            self.action_delete_selected.setEnabled(False)
+            self.action_toolbar_delete_selected.setEnabled(False)
+
         # Add a way to identify all the currently selected columns
         cols = self.csv_data_table.selectionModel().selectedColumns()
         self.selected_columns = []
@@ -290,6 +382,49 @@ class CsvEditor(QMainWindow):
     def set_save_enabled(self, enabled):
         self.action_toolbar_save_file.setEnabled(enabled)
         self.action_save_file.setEnabled(enabled)
+
+    def close_file(self):
+        if self.file_changed:
+            self.prompt_save_before_closing()
+
+        # Disable Column Layout menu option
+        self.action_column_layout.setEnabled(False)
+        self.action_add_data.setEnabled(False)
+        self.column_visibility_dialog_reference = None
+        # Disable other file related options
+        self.action_toolbar_add_data.setEnabled(False)
+        self.action_close_file.setEnabled(False)
+
+        self.column_headers_all = []
+        self.column_headers = []
+
+        # Remove plot and file page tab
+        try:
+            # with each deletion index of the current tab decreases
+            self.tabWidget.removeTab(0)
+            self.tabWidget.removeTab(0)
+            self.tabWidget.removeTab(0)
+        except:
+            pass
+
+        self.tabWidget.insertTab(0, self.start_page_tab, "Start Page")
+        # Disable the column layout option and enable only when csv is loaded
+        self.action_column_layout.setEnabled(False)
+        # Disable add data option and enable only when csv is loaded
+        self.action_add_data.setEnabled(False)
+        self.action_toolbar_add_data.setEnabled(False)
+        self.action_edit_data.setEnabled(False)
+        self.action_delete_selected.setEnabled(False)
+        self.action_toolbar_delete_selected.setEnabled(False)
+        self.action_close_file.setEnabled(False)
+        self.action_save_file.setEnabled(False)
+
+        self.set_plot_options(False)
+
+        # If user selected not to save changes, in this case var wont change to false withing prompt funtion
+        self.file_changed = False
+
+        # TODO: Add a way to open Start page tab again
 
     def prompt_save_before_closing(self):
         if self.file_changed:
@@ -397,25 +532,32 @@ class CsvEditor(QMainWindow):
             # TODO: Understand in a better way what exactly is expected in smooth curve plotting
 
             print("plotType = 2")
+
+            # Try block is added as as of now smoth line can be plotting only if the data consists entirely of numeric value
+
             # Smoothen the curve points
-            for i in range(0, len(data_x_axis)):
-                data_x_axis[i] = int(data_x_axis[i])
-                data_y_axis[i] = int(data_y_axis[i])
+            try:
+                for i in range(0, len(data_x_axis)):
+                    data_x_axis[i] = int(data_x_axis[i])
+                    data_y_axis[i] = int(data_y_axis[i])
 
-            print(data_x_axis, data_y_axis)
+                print(data_x_axis, data_y_axis)
 
-            data_x_axis = sorted(data_x_axis)
-            data_y_axis = sorted(data_y_axis)
+                data_x_axis = sorted(data_x_axis)
+                data_y_axis = sorted(data_y_axis)
 
-            T = np.array(data_x_axis)
-            power = np.array(data_y_axis)
+                T = np.array(data_x_axis)
+                power = np.array(data_y_axis)
 
-            xnew = np.linspace(T.min(), T.max(), 300)  # 300 represents number of points to make between T.min and T.max
+                xnew = np.linspace(T.min(), T.max(),
+                                   300)  # 300 represents number of points to make between T.min and T.max
 
-            spl = make_interp_spline(T, power, k=3)  # BSpline object
-            power_smooth = spl(xnew)
+                spl = make_interp_spline(T, power, k=3)  # BSpline object
+                power_smooth = spl(xnew)
 
-            ax.plot(xnew, power_smooth)
+                ax.plot(xnew, power_smooth)
+            except:
+                ax.plot(data_x_axis, data_y_axis)
 
             # ax.plot(data_x_axis, data_y_axis)
 

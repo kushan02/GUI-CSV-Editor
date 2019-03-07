@@ -16,7 +16,7 @@
   <property name="modal">
    <bool>true</bool>
   </property>
-  <widget class="QDialogButtonBox" name="buttonBox">
+  <widget class="QDialogButtonBox" name="btn_save_header_view">
    <property name="geometry">
     <rect>
      <x>30</x>
@@ -44,10 +44,13 @@
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QScrollArea" name="scrollArea">
+      <property name="sizeAdjustPolicy">
+       <enum>QAbstractScrollArea::AdjustToContents</enum>
+      </property>
       <property name="widgetResizable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
+      <widget class="QWidget" name="column_layout_list_scroll_area">
        <property name="geometry">
         <rect>
          <x>0</x>
@@ -83,7 +86,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>btn_save_header_view</sender>
    <signal>accepted()</signal>
    <receiver>ContentLayoutDialog</receiver>
    <slot>accept()</slot>
@@ -99,7 +102,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>buttonBox</sender>
+   <sender>btn_save_header_view</sender>
    <signal>rejected()</signal>
    <receiver>ContentLayoutDialog</receiver>
    <slot>reject()</slot>
