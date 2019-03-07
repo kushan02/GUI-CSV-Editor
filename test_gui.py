@@ -1,6 +1,8 @@
+import os
 import random
 import sys
 from PyQt5 import uic
+from PyQt5.QtCore import QFileInfo, QUrl
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QDialog, \
     QMessageBox, QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QFrame
 import csv
@@ -106,9 +108,41 @@ class CsvEditor(QMainWindow):
 
         self.column_visibility_dialog_reference = None
 
-        # self.plot([1, 2, 3, 4, 5, 6], [7, 8, 9, 10, 11, 12], "Student", "Roll number")
+        self.set_bottom_toolbar_info(default_values=True)
+
+        # TODO: Revamp start page tab UX
+        # TODO: Add right click context menu for cell items (last stage of project if time permits)
 
         self.show()
+
+    def set_bottom_toolbar_info(self, default_values=False):
+        # Fill the info for the bottom toolbar
+        if default_values:
+            # self.toolbar_bottom_info.setStyleSheet("QToolBar{border-right:1px solid black;}")
+            self.action_toolbar_bottom_column_count.setIconText("Column count -")
+            self.action_toolbar_bottom_row_count.setIconText("Row count -")
+            self.action_toolbar_bottom_source.setIconText("Source: No Source")
+            self.action_toolbar_bottom_column.setIconText("Column -")
+            self.action_toolbar_bottom_row.setIconText("Row -")
+            self.action_toolbar_bottom_selected_cells.setIconText("Selected Cells -")
+            self.action_toolbar_bottom_text_length.setIconText("Text Length -")
+            self.cells_selected = []
+            self.csv_file_name = 'No Source'
+        else:
+            self.action_toolbar_bottom_column_count.setIconText(
+                "Column count " + str(self.csv_data_table.columnCount()))
+            self.action_toolbar_bottom_row_count.setIconText("Row count " + str(self.csv_data_table.rowCount()))
+            self.action_toolbar_bottom_source.setIconText("Source: " + self.csv_file_name)
+            self.action_toolbar_bottom_column.setIconText("Column " + str(self.csv_data_table.currentColumn() + 1))
+            self.action_toolbar_bottom_row.setIconText("Row " + str(self.csv_data_table.currentRow() + 1))
+            self.action_toolbar_bottom_selected_cells.setIconText("Selected Cells " + str(len(self.cells_selected)))
+        try:
+            row = self.csv_data_table.currentRow()
+            col = self.csv_data_table.currentColumn()
+            value = self.csv_data_table.item(row, col).text()
+        except:
+            value = ''
+        self.action_toolbar_bottom_text_length.setIconText("Text Length " + str(len(value)))
 
     def set_connections(self):
         # Column layout dialog function
@@ -258,6 +292,14 @@ class CsvEditor(QMainWindow):
 
         # Proceed if and only if a valid file is selected and the file dialog is not cancelled
         if csv_file_path[0]:
+
+            # self.csv_file_name = QFileInfo(csv_file_path).fileName()
+            # self.csv_file_name = QUrl.fromLocalFile(csv_file_path)
+
+            filepath = os.path.normpath(csv_file_path[0])
+            filename = filepath.split(os.sep)
+            self.csv_file_name = filename[-1]
+
             with open(csv_file_path[0], newline='') as csv_file:
 
                 self.csv_data_table.setRowCount(0)
@@ -300,6 +342,8 @@ class CsvEditor(QMainWindow):
             self.action_toolbar_add_data.setEnabled(True)
             self.action_close_file.setEnabled(True)
 
+            self.set_bottom_toolbar_info()
+
     def save_file(self):
 
         file_save_path = QFileDialog.getSaveFileName(self, 'Save CSV', "", 'CSV(*.csv)')
@@ -328,6 +372,7 @@ class CsvEditor(QMainWindow):
             self.file_changed = False
             self.set_save_enabled(False)
 
+            # TODO: add a better variant of message box compared to about like sucess, critical, warning etc according to context
             QMessageBox.about(self, "Success!", "Your file has been saved successfully.")
 
     def cell_change_current(self):
@@ -340,24 +385,28 @@ class CsvEditor(QMainWindow):
                 value = self.csv_data_table.item(row, col).text()
                 print("The current cell is ", row, ", ", col)
                 print("In this cell we have: ", value)
+
+                self.set_bottom_toolbar_info()
+
         except:
             pass
         finally:
             # Set the flag to changes in current file state
-            self.file_changed = True
-            self.set_save_enabled(True)
+            if self.check_cell_change:
+                self.file_changed = True
+                self.set_save_enabled(True)
 
     def cell_selection_changed(self):
 
         # Enable Edit Cell menu if a single cell is selection else disable it
-        cells_selected = self.csv_data_table.selectionModel().selectedIndexes()
-        if len(cells_selected) == 1:
+        self.cells_selected = self.csv_data_table.selectionModel().selectedIndexes()
+        if len(self.cells_selected) == 1:
             self.action_edit_data.setEnabled(True)
         else:
             self.action_edit_data.setEnabled(False)
 
         # Enable delete options iff 1 or more cells are selected
-        if len(cells_selected) >= 1:
+        if len(self.cells_selected) >= 1:
             self.action_delete_selected.setEnabled(True)
             self.action_toolbar_delete_selected.setEnabled(True)
         else:
@@ -378,6 +427,8 @@ class CsvEditor(QMainWindow):
             row = index.row()
             self.selected_rows.append(row)
         print(self.selected_rows)
+
+        self.set_bottom_toolbar_info()
 
         # Enable plot toolbars iff exactly 2 columns are selected
         if len(self.selected_columns) == 2:
@@ -404,6 +455,8 @@ class CsvEditor(QMainWindow):
     def close_file(self):
         if self.file_changed:
             self.prompt_save_before_closing()
+
+        self.set_bottom_toolbar_info(default_values=True)
 
         # Disable Column Layout menu option
         self.action_column_layout.setEnabled(False)
