@@ -38,7 +38,9 @@ class CsvEditor(QMainWindow):
         self.tabWidget.setCurrentIndex(0)
 
         # Disable the column layout option and enable only when csv is loaded
-        self.action_column_layout.setDisabled(True)
+        self.action_column_layout.setEnabled(False)
+        # Disable add data option and enable only when csv is loaded
+        self.action_add_data.setEnabled(False)
 
         # Flag for not detecting cell state change when opening the file
         self.check_cell_change = True
@@ -110,6 +112,52 @@ class CsvEditor(QMainWindow):
         self.plot_title = 'Plot Title'
         self.btn_set_plot_title.clicked.connect(self.set_plot_title)
 
+        # Add data function
+        self.action_add_data.triggered.connect(self.add_blank_data_row)
+
+        # Delete data function
+        self.action_toolbar_delete_selected.triggered.connect(self.delete_selection)
+
+        # TODO: Add functionality to close file which would open the start page again
+
+    def add_blank_data_row(self):
+        last_row_count = self.csv_data_table.rowCount()
+        column_count = self.csv_data_table.columnCount()
+        self.csv_data_table.insertRow(last_row_count)
+        for empty_col in range(0, column_count):
+            item = QTableWidgetItem('')
+            self.csv_data_table.setItem(last_row_count, empty_col, item)
+
+    def delete_selection(self):
+        # TODO: Delete the selected cell
+        # If whole column is selected remove that column completely
+        # If whole row is selected remove that row completely
+        # Else make the selected cells blank
+
+        selected_columns = sorted(self.selected_columns, reverse=True)
+        selected_rows = sorted(self.selected_rows, reverse=True)
+
+        # delete any fully selected column
+        for col in selected_columns:
+            self.csv_data_table.removeColumn(col)
+
+        self.selected_columns.clear()
+
+        # delete any fully selected row
+        for row in selected_rows:
+            self.csv_data_table.removeRow(row)
+
+        self.selected_rows.clear()
+
+        # Now check if any individual cells are to be deleted
+
+        cells = self.csv_data_table.selectionModel().selectedIndexes()
+
+        for cell in sorted(cells):
+            r = cell.row()
+            c = cell.column()
+            self.csv_data_table.item(r, c).setText('')
+
     def open_column_layout_dialog(self):
         self.column_layout_dialog = ColumnLayoutDialog()
         self.column_layout_dialog.setModal(True)
@@ -164,7 +212,8 @@ class CsvEditor(QMainWindow):
             self.tabWidget.insertTab(1, self.csv_table_tab, "Main Document")
 
             # Enable Column Layout menu option
-            self.action_column_layout.setDisabled(False)
+            self.action_column_layout.setEnabled(True)
+            self.action_add_data.setEnabled(True)
 
             # TODO: Add checkbox for each column header to toggle its visibility in the table
 
@@ -214,6 +263,13 @@ class CsvEditor(QMainWindow):
             col = index.column()
             self.selected_columns.append(col)
         print(self.selected_columns)
+
+        rows = self.csv_data_table.selectionModel().selectedRows()
+        self.selected_rows = []
+        for index in sorted(rows):
+            row = index.row()
+            self.selected_rows.append(row)
+        print(self.selected_rows)
 
         # Enable plot toolbars iff exactly 2 columns are selected
         if len(self.selected_columns) == 2:
@@ -275,10 +331,6 @@ class CsvEditor(QMainWindow):
             QMessageBox.about(self, "Error!", "Please enter a title to set in the plot")
 
     def plot(self, plotType):
-
-        # TODO: Implement save as png feature
-
-        # TODO: Find a way to implement the scatter with smooth lines plot
 
         # Build plotting data
         # TODO: Try to improve time complexity of the building up of plotting data
