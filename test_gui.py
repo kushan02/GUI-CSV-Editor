@@ -51,8 +51,6 @@ class ColumnLayoutDialog(QDialog):
                 self.visible_headers_list.append(check_box_list[loop].text())
         print(self.visible_headers_list)
 
-        # TODO: Find a way to update the checklist changes back to the UI
-
     def get_visible_header_list(self):
         return self.get_visible_header_list
 
@@ -302,8 +300,6 @@ class CsvEditor(QMainWindow):
             self.action_toolbar_add_data.setEnabled(True)
             self.action_close_file.setEnabled(True)
 
-            # TODO: Add checkbox for each column header to toggle its visibility in the table
-
     def save_file(self):
 
         file_save_path = QFileDialog.getSaveFileName(self, 'Save CSV', "", 'CSV(*.csv)')
@@ -446,8 +442,6 @@ class CsvEditor(QMainWindow):
         # If user selected not to save changes, in this case var wont change to false withing prompt funtion
         self.file_changed = False
         self.set_save_enabled(False)
-
-        # TODO: Add a way to open Start page tab again
 
     def prompt_save_before_closing(self):
         if self.file_changed:
