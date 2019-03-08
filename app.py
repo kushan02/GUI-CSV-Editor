@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """ CSV Editor
 
-This project done for the completion of screening task for python, FOSSEE 2019 fellowship.
-The task requirement was to implement a fully functional GUI CSV Editor by using Python and PyQT as open source project hosted on github.
+This project done for the completion of screening task for python, FOSSEE 2019 fellowship. The task requirement was
+to implement a fully functional GUI CSV Editor by using Python and PyQT as open source project hosted on github.
 
 Project link on Github: https://github.com/kushan02/fsf_2019_screening_task2
 
@@ -33,11 +33,9 @@ The below code uses PEP 8 style guide for Python
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidgetItem, QDialog, \
     QMessageBox, QVBoxLayout, QCheckBox
-
 import os
 import sys
-import csv  # Used for manipulating csv files
-
+import csv
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from scipy.interpolate import make_interp_spline  # Below two libraries are used to plot the smooth curve
@@ -51,11 +49,14 @@ import numpy as np
 class CsvEditor(QMainWindow):
     def __init__(self):
         super(CsvEditor, self).__init__()
+
         # Load the layout file created in QT Creator
-        uic.loadUi('mainwindow.ui', self)
         # This is done to ensure that the UX remains consistent (better than writing manual code for UI)
         # and designed in optimal way using QT's own toolset
+        uic.loadUi('mainwindow.ui', self)
 
+        # Save the references of all tabs to avoid garbage collection
+        # which leads to crash to opening of UI loaded tabs to avoid resource duplication
         self.csv_table_tab = self.main_document_tab
         self.start_page_tab = self.start_tab
         self.plot_page_tab = self.plot_tab
@@ -108,7 +109,6 @@ class CsvEditor(QMainWindow):
     def set_bottom_toolbar_info(self, default_values=False):
         # Fill the info for the bottom toolbar
         if default_values:
-            # self.toolbar_bottom_info.setStyleSheet("QToolBar{border-right:1px solid black;}")
             self.action_toolbar_bottom_column_count.setIconText("Column count -")
             self.action_toolbar_bottom_row_count.setIconText("Row count -")
             self.action_toolbar_bottom_source.setIconText("Source: No Source")
@@ -273,10 +273,6 @@ class CsvEditor(QMainWindow):
             col_index = col_index + 1
 
     def load_csv(self):
-
-        # if self.file_changed:
-        #     self.prompt_save_before_closing()
-
         # Close any already opened file if any
         self.close_file()
 
@@ -292,9 +288,7 @@ class CsvEditor(QMainWindow):
         # Proceed if and only if a valid file is selected and the file dialog is not cancelled
         if csv_file_path[0]:
 
-            # self.csv_file_name = QFileInfo(csv_file_path).fileName()
-            # self.csv_file_name = QUrl.fromLocalFile(csv_file_path)
-
+            # Get only the file name from path. eg. 'data_file.csv'
             filepath = os.path.normpath(csv_file_path[0])
             filename = filepath.split(os.sep)
             self.csv_file_name = filename[-1]

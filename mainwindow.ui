@@ -23,7 +23,11 @@
     <normaloff>icons/app_icon.png</normaloff>icons/app_icon.png</iconset>
   </property>
   <property name="styleSheet">
-   <string notr="true">QWidget{
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <property name="styleSheet">
+    <string notr="true">QWidget{
 background-color: #fafafa;
 color: #383a42;
 }
@@ -41,6 +45,13 @@ padding: 5px;
 border: 1px solid #cacaca
 }
 
+QTableView::item{
+padding: 7px;
+}
+
+QTableView::item:focus{
+padding: 0;
+}
 
 
 QScrollBar:horizontal {
@@ -71,8 +82,7 @@ margin: 21px 0px 21px 0px;
 
 
 </string>
-  </property>
-  <widget class="QWidget" name="centralwidget">
+   </property>
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabWidget">
