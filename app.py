@@ -284,7 +284,6 @@ class CsvEditor(QMainWindow):
 
         # Create a new instance iff required, else save resources
         if self.column_visibility_dialog_reference is None:
-            print("HEADERS", self.column_headers)
             self.column_visibility_dialog_reference = ColumnLayoutDialog()
 
         self.column_visibility_dialog_reference.add_header_visible_options(self.column_headers_all, self.column_headers)
@@ -396,8 +395,6 @@ class CsvEditor(QMainWindow):
                 row = self.csv_data_table.currentRow()
                 col = self.csv_data_table.currentColumn()
                 value = self.csv_data_table.item(row, col).text()
-                print("The current cell is ", row, ", ", col)
-                print("In this cell we have: ", value)
 
                 self.set_bottom_toolbar_info()
 
@@ -432,14 +429,12 @@ class CsvEditor(QMainWindow):
         for index in sorted(cols):
             col = index.column()
             self.selected_columns.append(col)
-        print(self.selected_columns)
 
         rows = self.csv_data_table.selectionModel().selectedRows()
         self.selected_rows = []
         for index in sorted(rows):
             row = index.row()
             self.selected_rows.append(row)
-        print(self.selected_rows)
 
         self.set_bottom_toolbar_info()
 
@@ -450,7 +445,7 @@ class CsvEditor(QMainWindow):
             self.set_plot_options(False)
 
     def hide_invisible_headers(self):
-        print("HIDE: ", self.column_headers)
+
         # Hide all the non selected columns
         col_index = 0
         for header in self.column_headers_all:
@@ -529,7 +524,7 @@ class CsvEditor(QMainWindow):
 
     def flip_plot_axes(self):
         self.plot_inverted = not self.plot_inverted
-        print("invert = ", self.plot_inverted)
+
         if not self.plot_inverted:
             self.draw_plot(self.data_x_axis, self.data_y_axis, self.label_x_axis, self.label_y_axis, self.plot_inverted)
         else:
@@ -549,7 +544,6 @@ class CsvEditor(QMainWindow):
 
         self.label_x_axis = self.csv_data_table.horizontalHeaderItem(self.selected_columns[0]).text()
         self.label_y_axis = self.csv_data_table.horizontalHeaderItem(self.selected_columns[1]).text()
-        print(self.data_x_axis, self.data_y_axis)
 
         # Avoid duplication of resources if already allocated
         if self.figure is None:
@@ -590,14 +584,12 @@ class CsvEditor(QMainWindow):
         ax.set_ylabel(label_y_axis)
 
         if self.plotType == 1:
-            print("plotType = 1")
+
             ax.plot(data_x_axis, data_y_axis)
         elif self.plotType == 2:
 
             # SMOOTH CURVE CURRENTLY WORKS ONLY WIHT INTEGRAL VALUES
             # TODO: Understand in a better way what exactly is expected in smooth curve plotting
-
-            print("plotType = 2")
 
             # Try block is added as as of now smoth line can be plotting only if the data consists entirely of numeric value
 
@@ -606,8 +598,6 @@ class CsvEditor(QMainWindow):
                 for i in range(0, len(data_x_axis)):
                     data_x_axis[i] = int(data_x_axis[i])
                     data_y_axis[i] = int(data_y_axis[i])
-
-                print(data_x_axis, data_y_axis)
 
                 data_x_axis = sorted(data_x_axis)
                 data_y_axis = sorted(data_y_axis)
@@ -628,7 +618,7 @@ class CsvEditor(QMainWindow):
             # ax.plot(data_x_axis, data_y_axis)
 
         else:
-            print("plotType = 3")
+
             ax.scatter(data_x_axis, data_y_axis)
 
         self.canvas.draw()
@@ -686,7 +676,6 @@ class ColumnLayoutDialog(QDialog):
         for loop in range(len(check_box_list)):
             if check_box_list[loop].isChecked():
                 self.visible_headers_list.append(check_box_list[loop].text())
-        print(self.visible_headers_list)
 
 
 if __name__ == '__main__':
