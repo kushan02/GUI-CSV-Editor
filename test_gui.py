@@ -110,7 +110,6 @@ class CsvEditor(QMainWindow):
 
         self.set_bottom_toolbar_info(default_values=True)
 
-        # TODO: Revamp start page tab UX
         # TODO: Add right click context menu for cell items (last stage of project if time permits)
 
         self.show()
@@ -223,6 +222,11 @@ class CsvEditor(QMainWindow):
         selected_columns = sorted(self.selected_columns, reverse=True)
         selected_rows = sorted(self.selected_rows, reverse=True)
 
+        fileChanged = False
+        if len(selected_rows) > 0 or len(selected_columns) > 0:
+            self.file_changed = True
+            self.set_save_enabled(True)
+
         # delete any fully selected column
         for col in selected_columns:
             self.csv_data_table.removeColumn(col)
@@ -238,6 +242,10 @@ class CsvEditor(QMainWindow):
         # Now check if any individual cells are to be deleted
 
         cells = self.csv_data_table.selectionModel().selectedIndexes()
+
+        if len(cells) > 0:
+            self.file_changed = True
+            self.set_save_enabled(True)
 
         for cell in sorted(cells):
             r = cell.row()
@@ -552,9 +560,9 @@ class CsvEditor(QMainWindow):
             self.figure = plt.figure()
             self.canvas = FigureCanvas(self.figure)
 
-            self.plot_frame_horizontal.addStretch()
+            # self.plot_frame_horizontal.addStretch()
             self.plot_frame_horizontal.addWidget(self.canvas)
-            self.plot_frame_horizontal.addStretch()
+            # self.plot_frame_horizontal.addStretch()
 
         # Ensures only 2 tabs at max are open at a time - file and plot tabs respectively
         if self.tabWidget.count() == 1:

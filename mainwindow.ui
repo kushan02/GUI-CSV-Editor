@@ -10,261 +10,405 @@
     <height>457</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Google Sans</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>CSV Editor</string>
   </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>icons/app_icon.png</normaloff>icons/app_icon.png</iconset>
+  </property>
   <property name="styleSheet">
-   <string notr="true"/>
+   <string notr="true">QWidget{
+background-color: #fafafa;
+color: #383a42;
+}
+
+QPushButton{
+border-radius: 3px;
+background-color: #f1f2f4;
+padding: 5px;
+border: 1px solid #cacaca
+}
+
+QLineEdit{
+border-radius: 3px;
+padding: 5px;
+border: 1px solid #cacaca
+}
+
+
+
+QScrollBar:horizontal {
+  border-color: rgb(227, 227, 227);
+  border-width: 1px;
+  border-style: solid;
+  background-color: rgb(240, 240, 240);
+    height: 15px;
+margin: 0px -21px 0 21px;
+ }
+
+ QScrollBar::handle:horizontal {
+    background-color: rgb(200, 200, 200);
+ }
+
+
+QScrollBar:vertical {
+  border-color: rgb(227, 227, 227);
+  border-width: 1px;
+  border-style: solid;
+  background-color: rgb(240, 240, 240);
+margin: 21px 0px 21px 0px;
+ }
+
+ QScrollBar::handle:verticall {
+    background-color: rgb(200, 200, 200);
+ }
+
+
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QTabWidget" name="tabWidget">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>0</y>
-      <width>621</width>
-      <height>411</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>127</width>
-      <height>0</height>
-     </size>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::TabFocus</enum>
-    </property>
-    <property name="tabShape">
-     <enum>QTabWidget::Rounded</enum>
-    </property>
-    <property name="currentIndex">
-     <number>2</number>
-    </property>
-    <property name="movable">
-     <bool>false</bool>
-    </property>
-    <property name="tabBarAutoHide">
-     <bool>false</bool>
-    </property>
-    <widget class="QWidget" name="start_tab">
-     <attribute name="title">
-      <string>Start Page</string>
-     </attribute>
-     <attribute name="toolTip">
-      <string>Welcome to CSV Editor's start page</string>
-     </attribute>
-     <widget class="QWidget" name="verticalLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>70</x>
-        <y>40</y>
-        <width>236</width>
-        <height>131</height>
-       </rect>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="minimumSize">
+       <size>
+        <width>127</width>
+        <height>0</height>
+       </size>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
-        <widget class="QLabel" name="label">
-         <property name="font">
-          <font>
-           <family>Google Sans</family>
-           <pointsize>16</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string>CSV Editor's Start Page</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="start_page_btn_open_file">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-          </font>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Open File</string>
-         </property>
-        </widget>
-       </item>
-       <item alignment="Qt::AlignLeft">
-        <widget class="QPushButton" name="btn_load_csv">
-         <property name="text">
-          <string>Load CSV</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="verticalLayoutWidget_2">
-      <property name="geometry">
-       <rect>
-        <x>340</x>
-        <y>40</y>
-        <width>236</width>
-        <height>131</height>
-       </rect>
+      <property name="focusPolicy">
+       <enum>Qt::TabFocus</enum>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_4">
-       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
-        <widget class="QLabel" name="label_2">
-         <property name="font">
-          <font>
-           <family>Google Sans</family>
-           <pointsize>16</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="start_page_btn_recent_files">
-         <property name="font">
-          <font>
-           <pointsize>11</pointsize>
-          </font>
-         </property>
-         <property name="autoFillBackground">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Recent Files</string>
-         </property>
-        </widget>
-       </item>
-       <item alignment="Qt::AlignLeft">
-        <widget class="QPushButton" name="pushButton_4">
-         <property name="text">
-          <string>Filename here</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="main_document_tab">
-     <property name="focusPolicy">
-      <enum>Qt::NoFocus</enum>
-     </property>
-     <attribute name="title">
-      <string>Main Document</string>
-     </attribute>
-     <widget class="QTableWidget" name="csv_data_table">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>10</y>
-        <width>611</width>
-        <height>341</height>
-       </rect>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
       </property>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="plot_tab">
-     <attribute name="title">
-      <string>Plot</string>
-     </attribute>
-     <widget class="QWidget" name="horizontalLayoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>39</x>
-        <y>10</y>
-        <width>541</width>
-        <height>31</height>
-       </rect>
+      <property name="currentIndex">
+       <number>0</number>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <item>
-        <widget class="QPushButton" name="btn_save_plot">
-         <property name="text">
-          <string>Save Plot PNG</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_close_plot">
-         <property name="text">
-          <string>Close Plot</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="horizontalSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLineEdit" name="input_plot_title">
-         <property name="maxLength">
-          <number>50</number>
-         </property>
-         <property name="placeholderText">
-          <string>Plot Title</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="btn_set_plot_title">
-         <property name="text">
-          <string>Set Title</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="radio_plot_xy">
-         <property name="text">
-          <string>Plot (x,y)</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QRadioButton" name="radio_plot_yx">
-         <property name="text">
-          <string>Plot (y,x)</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="verticalLayoutWidget_3">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>50</y>
-        <width>571</width>
-        <height>301</height>
-       </rect>
+      <property name="movable">
+       <bool>false</bool>
       </property>
-      <layout class="QVBoxLayout" name="plot_frame">
-       <item>
-        <layout class="QHBoxLayout" name="plot_frame_horizontal"/>
-       </item>
-      </layout>
+      <property name="tabBarAutoHide">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="start_tab">
+       <attribute name="title">
+        <string>Start Page</string>
+       </attribute>
+       <attribute name="toolTip">
+        <string>Welcome to CSV Editor's start page</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <spacer name="verticalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item alignment="Qt::AlignHCenter">
+             <widget class="QLabel" name="label_left_main_title">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <family>Google Sans</family>
+                <pointsize>36</pointsize>
+                <weight>50</weight>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string>CSV Editor</string>
+              </property>
+              <property name="margin">
+               <number>0</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_left_sub_title">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <family>Google Sans</family>
+                <pointsize>16</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+                <underline>true</underline>
+               </font>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">color:rgb(20,146,255);</string>
+              </property>
+              <property name="text">
+               <string>A feature rich CSV Viewer &amp; Editor</string>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::AutoText</enum>
+              </property>
+              <property name="scaledContents">
+               <bool>true</bool>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+              <item>
+               <widget class="QLabel" name="label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>1</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="font">
+                 <font>
+                  <family>Google Sans</family>
+                  <pointsize>15</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Get Started!</string>
+                </property>
+                <property name="scaledContents">
+                 <bool>true</bool>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item alignment="Qt::AlignHCenter">
+               <widget class="QPushButton" name="btn_load_csv">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                  <horstretch>2</horstretch>
+                  <verstretch>2</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>12</pointsize>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">padding:10px;
+border-radius:5px;
+border-color: #cacaca;
+width:300px;</string>
+                </property>
+                <property name="text">
+                 <string>Open a CSV File</string>
+                </property>
+                <property name="icon">
+                 <iconset>
+                  <normaloff>icons/app_icon_bw.png</normaloff>icons/app_icon_bw.png</iconset>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <spacer name="verticalSpacer">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;For help, please visit&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;# The CSV Editor Github Page&lt;/span&gt;&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;# Powered by openSource community!&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="main_document_tab">
+       <property name="focusPolicy">
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <attribute name="title">
+        <string>Main Document</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QTableWidget" name="csv_data_table"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="plot_tab">
+       <attribute name="title">
+        <string>Plot</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_3" rowstretch="0,1">
+        <item row="1" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="topMargin">
+           <number>10</number>
+          </property>
+          <item>
+           <layout class="QHBoxLayout" name="plot_frame_horizontal">
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="0">
+         <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,0,0,0,0,0,0">
+          <property name="spacing">
+           <number>6</number>
+          </property>
+          <property name="sizeConstraint">
+           <enum>QLayout::SetFixedSize</enum>
+          </property>
+          <item>
+           <widget class="QPushButton" name="btn_save_plot">
+            <property name="toolTip">
+             <string>The PNG file would have perfect plotting as opposed to maybe cramped plot here</string>
+            </property>
+            <property name="text">
+             <string>Save Plot PNG</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_close_plot">
+            <property name="text">
+             <string>Close Plot</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="input_plot_title">
+            <property name="maxLength">
+             <number>50</number>
+            </property>
+            <property name="placeholderText">
+             <string>Plot Title</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_set_plot_title">
+            <property name="text">
+             <string>Set Title</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radio_plot_xy">
+            <property name="styleSheet">
+             <string notr="true">QRadioButton{
+padding:5px;
+}</string>
+            </property>
+            <property name="text">
+             <string>Plot (x,y)</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radio_plot_yx">
+            <property name="styleSheet">
+             <string notr="true">QRadioButton{
+padding:5px;
+}</string>
+            </property>
+            <property name="text">
+             <string>Plot (y,x)</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
      </widget>
-    </widget>
-   </widget>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -555,9 +699,7 @@ border-color: transparent #ccc transparent transparent
     <string>5</string>
    </property>
    <property name="font">
-    <font>
-     <underline>false</underline>
-    </font>
+    <font/>
    </property>
   </action>
   <action name="action_toolbar_bottom_selected_cells">
