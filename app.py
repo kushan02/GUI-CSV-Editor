@@ -1,65 +1,51 @@
-import os
-import random
-import sys
+# -*- coding: utf-8 -*-
+""" CSV Editor
+
+This project done for the completion of screening task for python, FOSSEE 2019 fellowship.
+The task requirement was to implement a fully functional GUI CSV Editor by using Python and PyQT as open source project hosted on github.
+
+Project link on Github: https://github.com/kushan02/fsf_2019_screening_task2
+
+Created On: Mar 4, 2019
+Author: Kushan Mehta
+Email: kushan.mehta02@gmail.com
+
+Features:
+    1. Load a CSV file and view it in table form
+    2. Add data to the table as a new blank row
+    3. Edit Data in the table
+    4. Delete data from the table:
+        1) Option to delete whole column or whole row and also individual cells
+    5. show/hide Columns: Select which columns should be visible in the desired table
+    6. Plot any two columns with following plots in a new tab:
+        1) Plot scatter points
+        2) Plot scatter points with smooth lines
+        3) Plot lines
+    7. Ability to add a custom title for the plot on the fly
+    8. Ability to flip the X and Y axes on the fly
+    9. Save the plot as PNG file
+    10. Prompt for saving the file in case any modifications are made to the original file
+
+The below code uses PEP 8 style guide for Python
+
+"""
+
 from PyQt5 import uic
-from PyQt5.QtCore import QFileInfo, QUrl
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidget, QTableWidgetItem, QDialog, \
-    QMessageBox, QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QFrame
-import csv
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidgetItem, QDialog, \
+    QMessageBox, QVBoxLayout, QCheckBox
+
+import os
+import sys
+import csv  # Used for manipulating csv files
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 import matplotlib.pyplot as plt
-
-# Below two libraries are used to plot the smooth curve
-from scipy.interpolate import make_interp_spline
+from scipy.interpolate import make_interp_spline  # Below two libraries are used to plot the smooth curve
 import numpy as np
 
 
-# TODO: Refactor the code to make it effecient and more readable
+# TODO: Refactor the code to make it efficient and more readable
 # TODO: Add requirements.txt file to project
-# TODO: Remove uneccessary files and imports
-
-
-class ColumnLayoutDialog(QDialog):
-    def __init__(self):
-        super(ColumnLayoutDialog, self).__init__()
-        uic.loadUi('contentlayoutdialog.ui', self)
-
-        self.visible_headers_list = []
-
-        self.btn_save_header_view.clicked.connect(self.save_header_list)
-
-        # self.show()
-
-    def add_header_visible_options(self, header_list, visible_list):
-
-        layout = QVBoxLayout()
-        for header in header_list:
-            check_box = QCheckBox(header)
-            if self.visible_headers_list:
-                if header in self.visible_headers_list:
-                    check_box.setChecked(True)
-                else:
-                    check_box.setChecked(False)
-            else:
-                check_box.setChecked(True)
-            layout.addWidget(check_box)
-
-        self.column_layout_list_scroll_area.setLayout(layout)
-        self.visible_headers_list = visible_list
-
-    def save_header_list(self):
-        self.visible_headers_list.clear()
-
-        check_box_list = self.column_layout_list_scroll_area.findChildren(QCheckBox)
-        for loop in range(len(check_box_list)):
-            if check_box_list[loop].isChecked():
-                self.visible_headers_list.append(check_box_list[loop].text())
-        print(self.visible_headers_list)
-
-    def get_visible_header_list(self):
-        return self.get_visible_header_list
 
 
 class CsvEditor(QMainWindow):
@@ -667,6 +653,45 @@ class CsvEditor(QMainWindow):
         self.tabWidget.removeTab(1)
         self.tabWidget.setCurrentIndex(0)
         self.plot_page_tab = tmp_tab_reference
+
+
+class ColumnLayoutDialog(QDialog):
+    def __init__(self):
+        super(ColumnLayoutDialog, self).__init__()
+        uic.loadUi('contentlayoutdialog.ui', self)
+
+        self.visible_headers_list = []
+
+        self.btn_save_header_view.clicked.connect(self.save_header_list)
+
+    def add_header_visible_options(self, header_list, visible_list):
+
+        layout = QVBoxLayout()
+        for header in header_list:
+            check_box = QCheckBox(header)
+            if self.visible_headers_list:
+                if header in self.visible_headers_list:
+                    check_box.setChecked(True)
+                else:
+                    check_box.setChecked(False)
+            else:
+                check_box.setChecked(True)
+            layout.addWidget(check_box)
+
+        self.column_layout_list_scroll_area.setLayout(layout)
+        self.visible_headers_list = visible_list
+
+    def save_header_list(self):
+        self.visible_headers_list.clear()
+
+        check_box_list = self.column_layout_list_scroll_area.findChildren(QCheckBox)
+        for loop in range(len(check_box_list)):
+            if check_box_list[loop].isChecked():
+                self.visible_headers_list.append(check_box_list[loop].text())
+        print(self.visible_headers_list)
+
+    def get_visible_header_list(self):
+        return self.get_visible_header_list
 
 
 if __name__ == '__main__':
