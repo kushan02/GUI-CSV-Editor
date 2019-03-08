@@ -45,7 +45,7 @@ import numpy as np
 # TODO: Refactor the code to make it efficient and more readable
 # TODO: Add requirements.txt file to project
 
-
+# Main GUI Window for the application
 class CsvEditor(QMainWindow):
     def __init__(self):
         super(CsvEditor, self).__init__()
@@ -106,34 +106,6 @@ class CsvEditor(QMainWindow):
 
         self.show()
 
-    def set_bottom_toolbar_info(self, default_values=False):
-        # Fill the info for the bottom toolbar
-        if default_values:
-            self.action_toolbar_bottom_column_count.setIconText("Column count -")
-            self.action_toolbar_bottom_row_count.setIconText("Row count -")
-            self.action_toolbar_bottom_source.setIconText("Source: No Source")
-            self.action_toolbar_bottom_column.setIconText("Column -")
-            self.action_toolbar_bottom_row.setIconText("Row -")
-            self.action_toolbar_bottom_selected_cells.setIconText("Selected Cells -")
-            self.action_toolbar_bottom_text_length.setIconText("Text Length -")
-            self.cells_selected = []
-            self.csv_file_name = 'No Source'
-        else:
-            self.action_toolbar_bottom_column_count.setIconText(
-                "Column count " + str(self.csv_data_table.columnCount()))
-            self.action_toolbar_bottom_row_count.setIconText("Row count " + str(self.csv_data_table.rowCount()))
-            self.action_toolbar_bottom_source.setIconText("Source: " + self.csv_file_name)
-            self.action_toolbar_bottom_column.setIconText("Column " + str(self.csv_data_table.currentColumn() + 1))
-            self.action_toolbar_bottom_row.setIconText("Row " + str(self.csv_data_table.currentRow() + 1))
-            self.action_toolbar_bottom_selected_cells.setIconText("Selected Cells " + str(len(self.cells_selected)))
-        try:
-            row = self.csv_data_table.currentRow()
-            col = self.csv_data_table.currentColumn()
-            value = self.csv_data_table.item(row, col).text()
-        except:
-            value = ''
-        self.action_toolbar_bottom_text_length.setIconText("Text Length " + str(len(value)))
-
     def set_connections(self):
         # Column layout dialog function
         self.action_column_layout.triggered.connect(self.open_column_layout_dialog)
@@ -187,6 +159,71 @@ class CsvEditor(QMainWindow):
 
         # Close file function
         self.action_close_file.triggered.connect(self.close_file)
+
+    def load_csv(self):
+        # Close any already opened file if any
+        self.close_file()
+
+        # Disable cell change check to avoid crashes
+        self.check_cell_change = False
+
+        # Set the flag to no changes in current file state
+        self.file_changed = False
+        self.set_save_enabled(False)
+
+        csv_file_path = QFileDialog.getOpenFileName(self, "Load CSV File", "", 'CSV(*.csv)')
+
+        # Proceed if and only if a valid file is selected and the file dialog is not cancelled
+        if csv_file_path[0]:
+
+            # Get only the file name from path. eg. 'data_file.csv'
+            filepath = os.path.normpath(csv_file_path[0])
+            filename = filepath.split(os.sep)
+            self.csv_file_name = filename[-1]
+
+            with open(csv_file_path[0], newline='') as csv_file:
+
+                self.csv_data_table.setRowCount(0)
+                self.csv_data_table.setColumnCount(0)
+
+                csv_file_read = csv.reader(csv_file, delimiter=',', quotechar='|')
+
+                # Fetch the column headers and move the iterator to actual data
+                self.column_headers = next(csv_file_read)
+
+                # A backup to keep a list of all the headers to toogle their view later
+                self.column_headers_all = self.column_headers[:]
+
+                for row_data in csv_file_read:
+                    row = self.csv_data_table.rowCount()
+                    self.csv_data_table.insertRow(row)
+                    self.csv_data_table.setColumnCount(len(row_data))
+                    for column, stuff in enumerate(row_data):
+                        item = QTableWidgetItem(stuff)
+                        self.csv_data_table.setItem(row, column, item)
+
+                self.csv_data_table.setHorizontalHeaderLabels(self.column_headers)
+
+            # Set WordWrap to True to make the cells change height according to content
+            # Currently set it to false as it looks very decent and makes cell size uniform throughout
+            self.csv_data_table.setWordWrap(False)
+            # Uncomment below line to stretch to fill the column width according to content
+            # self.csv_data_table.resizeColumnsToContents()
+            self.csv_data_table.resizeRowsToContents()
+
+            self.check_cell_change = True
+
+            # Close the start page tab and load the file tab
+            self.tabWidget.removeTab(0)
+            self.tabWidget.insertTab(1, self.csv_table_tab, "Main Document")
+
+            # Enable Column Layout menu option
+            self.action_column_layout.setEnabled(True)
+            self.action_add_data.setEnabled(True)
+            self.action_toolbar_add_data.setEnabled(True)
+            self.action_close_file.setEnabled(True)
+
+            self.set_bottom_toolbar_info()
 
     def add_blank_data_row(self):
         last_row_count = self.csv_data_table.rowCount()
@@ -259,83 +296,9 @@ class CsvEditor(QMainWindow):
         # Now hide the invisible headers
         self.hide_invisible_headers()
 
-    def hide_invisible_headers(self):
-        print("HIDE: ", self.column_headers)
-        # Hide all the non selected columns
-        col_index = 0
-        for header in self.column_headers_all:
-            if header in self.column_headers:
-                self.csv_data_table.setColumnHidden(col_index, False)
-                self.file_changed = True
-                self.set_save_enabled(True)
-            else:
-                self.csv_data_table.setColumnHidden(col_index, True)
-            col_index = col_index + 1
-
-    def load_csv(self):
-        # Close any already opened file if any
-        self.close_file()
-
-        # Disable cell change check to avoid crashes
-        self.check_cell_change = False
-
-        # Set the flag to no changes in current file state
-        self.file_changed = False
-        self.set_save_enabled(False)
-
-        csv_file_path = QFileDialog.getOpenFileName(self, "Load CSV File", "", 'CSV(*.csv)')
-
-        # Proceed if and only if a valid file is selected and the file dialog is not cancelled
-        if csv_file_path[0]:
-
-            # Get only the file name from path. eg. 'data_file.csv'
-            filepath = os.path.normpath(csv_file_path[0])
-            filename = filepath.split(os.sep)
-            self.csv_file_name = filename[-1]
-
-            with open(csv_file_path[0], newline='') as csv_file:
-
-                self.csv_data_table.setRowCount(0)
-                self.csv_data_table.setColumnCount(0)
-
-                csv_file_read = csv.reader(csv_file, delimiter=',', quotechar='|')
-
-                # Fetch the column headers and move the iterator to actual data
-                self.column_headers = next(csv_file_read)
-
-                # A backup to keep a list of all the headers to toogle their view later
-                self.column_headers_all = self.column_headers[:]
-
-                for row_data in csv_file_read:
-                    row = self.csv_data_table.rowCount()
-                    self.csv_data_table.insertRow(row)
-                    self.csv_data_table.setColumnCount(len(row_data))
-                    for column, stuff in enumerate(row_data):
-                        item = QTableWidgetItem(stuff)
-                        self.csv_data_table.setItem(row, column, item)
-
-                self.csv_data_table.setHorizontalHeaderLabels(self.column_headers)
-
-            # Set WordWrap to True to make the cells change height according to content
-            # Currently set it to false as it looks very decent and makes cell size uniform throughout
-            self.csv_data_table.setWordWrap(False)
-            # Uncomment below line to stretch to fill the column width according to content
-            # self.csv_data_table.resizeColumnsToContents()
-            self.csv_data_table.resizeRowsToContents()
-
-            self.check_cell_change = True
-
-            # Close the start page tab and load the file tab
-            self.tabWidget.removeTab(0)
-            self.tabWidget.insertTab(1, self.csv_table_tab, "Main Document")
-
-            # Enable Column Layout menu option
-            self.action_column_layout.setEnabled(True)
-            self.action_add_data.setEnabled(True)
-            self.action_toolbar_add_data.setEnabled(True)
-            self.action_close_file.setEnabled(True)
-
-            self.set_bottom_toolbar_info()
+    def set_save_enabled(self, enabled):
+        self.action_toolbar_save_file.setEnabled(enabled)
+        self.action_save_file.setEnabled(enabled)
 
     def save_file(self):
 
@@ -367,6 +330,63 @@ class CsvEditor(QMainWindow):
 
             # TODO: add a better variant of message box compared to about like sucess, critical, warning etc according to context
             QMessageBox.about(self, "Success!", "Your file has been saved successfully.")
+
+    def prompt_save_before_closing(self):
+        if self.file_changed:
+            choice = QMessageBox.question(self, 'Save File', "Do you want to save file before quiting?",
+                                          QMessageBox.Yes | QMessageBox.No)
+            if choice == QMessageBox.Yes:
+                self.save_file()
+
+    def close_file(self):
+        if self.file_changed:
+            self.prompt_save_before_closing()
+
+        self.set_bottom_toolbar_info(default_values=True)
+
+        # Disable Column Layout menu option
+        self.action_column_layout.setEnabled(False)
+        self.action_add_data.setEnabled(False)
+        self.column_visibility_dialog_reference = None
+        # Disable other file related options
+        self.action_toolbar_add_data.setEnabled(False)
+        self.action_close_file.setEnabled(False)
+
+        self.column_headers_all = []
+        self.column_headers = []
+
+        # Remove plot and file page tab
+        try:
+            # with each deletion index of the current tab decreases
+            self.tabWidget.removeTab(0)
+            self.tabWidget.removeTab(0)
+            self.tabWidget.removeTab(0)
+        except:
+            pass
+
+        self.tabWidget.insertTab(0, self.start_page_tab, "Start Page")
+        # Disable the column layout option and enable only when csv is loaded
+        self.action_column_layout.setEnabled(False)
+        # Disable add data option and enable only when csv is loaded
+        self.action_add_data.setEnabled(False)
+        self.action_toolbar_add_data.setEnabled(False)
+        self.action_edit_data.setEnabled(False)
+        self.action_delete_selected.setEnabled(False)
+        self.action_toolbar_delete_selected.setEnabled(False)
+        self.action_close_file.setEnabled(False)
+        self.action_save_file.setEnabled(False)
+
+        self.set_plot_options(False)
+
+        # If user selected not to save changes, in this case var wont change to false withing prompt funtion
+        self.file_changed = False
+        self.set_save_enabled(False)
+
+    def closeEvent(self, QCloseEvent):
+        # If application is being closed directly prompt for saving modified file
+        self.prompt_save_before_closing()
+
+    # Helper functions
 
     def cell_change_current(self):
 
@@ -429,6 +449,49 @@ class CsvEditor(QMainWindow):
         else:
             self.set_plot_options(False)
 
+    def hide_invisible_headers(self):
+        print("HIDE: ", self.column_headers)
+        # Hide all the non selected columns
+        col_index = 0
+        for header in self.column_headers_all:
+            if header in self.column_headers:
+                self.csv_data_table.setColumnHidden(col_index, False)
+                self.file_changed = True
+                self.set_save_enabled(True)
+            else:
+                self.csv_data_table.setColumnHidden(col_index, True)
+            col_index = col_index + 1
+
+    def set_bottom_toolbar_info(self, default_values=False):
+        # Fill the info for the bottom toolbar
+        if default_values:
+            self.action_toolbar_bottom_column_count.setIconText("Column count -")
+            self.action_toolbar_bottom_row_count.setIconText("Row count -")
+            self.action_toolbar_bottom_source.setIconText("Source: No Source")
+            self.action_toolbar_bottom_column.setIconText("Column -")
+            self.action_toolbar_bottom_row.setIconText("Row -")
+            self.action_toolbar_bottom_selected_cells.setIconText("Selected Cells -")
+            self.action_toolbar_bottom_text_length.setIconText("Text Length -")
+            self.cells_selected = []
+            self.csv_file_name = 'No Source'
+        else:
+            self.action_toolbar_bottom_column_count.setIconText(
+                "Column count " + str(self.csv_data_table.columnCount()))
+            self.action_toolbar_bottom_row_count.setIconText("Row count " + str(self.csv_data_table.rowCount()))
+            self.action_toolbar_bottom_source.setIconText("Source: " + self.csv_file_name)
+            self.action_toolbar_bottom_column.setIconText("Column " + str(self.csv_data_table.currentColumn() + 1))
+            self.action_toolbar_bottom_row.setIconText("Row " + str(self.csv_data_table.currentRow() + 1))
+            self.action_toolbar_bottom_selected_cells.setIconText("Selected Cells " + str(len(self.cells_selected)))
+        try:
+            row = self.csv_data_table.currentRow()
+            col = self.csv_data_table.currentColumn()
+            value = self.csv_data_table.item(row, col).text()
+        except:
+            value = ''
+        self.action_toolbar_bottom_text_length.setIconText("Text Length " + str(len(value)))
+
+    # Plot functions
+
     def set_plot_options(self, visibility):
 
         self.action_toolbar_plot_scatter_points.setEnabled(visibility)
@@ -440,66 +503,6 @@ class CsvEditor(QMainWindow):
         # Enable this option only once the plot is drawn
         self.action_save_plot_png.setEnabled(False)
         self.action_toolbar_save_plot_png.setEnabled(False)
-
-    def set_save_enabled(self, enabled):
-        self.action_toolbar_save_file.setEnabled(enabled)
-        self.action_save_file.setEnabled(enabled)
-
-    def close_file(self):
-        if self.file_changed:
-            self.prompt_save_before_closing()
-
-        self.set_bottom_toolbar_info(default_values=True)
-
-        # Disable Column Layout menu option
-        self.action_column_layout.setEnabled(False)
-        self.action_add_data.setEnabled(False)
-        self.column_visibility_dialog_reference = None
-        # Disable other file related options
-        self.action_toolbar_add_data.setEnabled(False)
-        self.action_close_file.setEnabled(False)
-
-        self.column_headers_all = []
-        self.column_headers = []
-
-        # Remove plot and file page tab
-        try:
-            # with each deletion index of the current tab decreases
-            self.tabWidget.removeTab(0)
-            self.tabWidget.removeTab(0)
-            self.tabWidget.removeTab(0)
-        except:
-            pass
-
-        self.tabWidget.insertTab(0, self.start_page_tab, "Start Page")
-        # Disable the column layout option and enable only when csv is loaded
-        self.action_column_layout.setEnabled(False)
-        # Disable add data option and enable only when csv is loaded
-        self.action_add_data.setEnabled(False)
-        self.action_toolbar_add_data.setEnabled(False)
-        self.action_edit_data.setEnabled(False)
-        self.action_delete_selected.setEnabled(False)
-        self.action_toolbar_delete_selected.setEnabled(False)
-        self.action_close_file.setEnabled(False)
-        self.action_save_file.setEnabled(False)
-
-        self.set_plot_options(False)
-
-        # If user selected not to save changes, in this case var wont change to false withing prompt funtion
-        self.file_changed = False
-        self.set_save_enabled(False)
-
-    def prompt_save_before_closing(self):
-        if self.file_changed:
-            choice = QMessageBox.question(self, 'Save File', "Do you want to save file before quiting?",
-                                          QMessageBox.Yes | QMessageBox.No)
-            if choice == QMessageBox.Yes:
-                self.save_file()
-
-    def closeEvent(self, QCloseEvent):
-        self.prompt_save_before_closing()
-        # QCloseEvent.ignore()
-        # self.close_application()
 
     def plot_scatter_points(self):
         self.plot(1)
@@ -523,6 +526,14 @@ class CsvEditor(QMainWindow):
                                self.plot_inverted)
         else:
             QMessageBox.about(self, "Error!", "Please enter a title to set in the plot")
+
+    def flip_plot_axes(self):
+        self.plot_inverted = not self.plot_inverted
+        print("invert = ", self.plot_inverted)
+        if not self.plot_inverted:
+            self.draw_plot(self.data_x_axis, self.data_y_axis, self.label_x_axis, self.label_y_axis, self.plot_inverted)
+        else:
+            self.draw_plot(self.data_y_axis, self.data_x_axis, self.label_y_axis, self.label_x_axis, self.plot_inverted)
 
     def plot(self, plotType):
 
@@ -559,14 +570,6 @@ class CsvEditor(QMainWindow):
         self.plotType = plotType
 
         self.draw_plot(self.data_x_axis, self.data_y_axis, self.label_x_axis, self.label_y_axis, self.plot_inverted)
-
-    def flip_plot_axes(self):
-        self.plot_inverted = not self.plot_inverted
-        print("invert = ", self.plot_inverted)
-        if not self.plot_inverted:
-            self.draw_plot(self.data_x_axis, self.data_y_axis, self.label_x_axis, self.label_y_axis, self.plot_inverted)
-        else:
-            self.draw_plot(self.data_y_axis, self.data_x_axis, self.label_y_axis, self.label_x_axis, self.plot_inverted)
 
     def draw_plot(self, data_x_axis, data_y_axis, label_x_axis, label_y_axis, flipped=False):
 
@@ -649,6 +652,7 @@ class CsvEditor(QMainWindow):
         self.plot_page_tab = tmp_tab_reference
 
 
+# Dialog window for show/hide Column visibility feature
 class ColumnLayoutDialog(QDialog):
     def __init__(self):
         super(ColumnLayoutDialog, self).__init__()
@@ -683,9 +687,6 @@ class ColumnLayoutDialog(QDialog):
             if check_box_list[loop].isChecked():
                 self.visible_headers_list.append(check_box_list[loop].text())
         print(self.visible_headers_list)
-
-    def get_visible_header_list(self):
-        return self.get_visible_header_list
 
 
 if __name__ == '__main__':
