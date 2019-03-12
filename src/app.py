@@ -45,6 +45,7 @@ import numpy as np
 # TODO: Refactor the code to make it efficient and more readable
 # TODO: Add requirements.txt file to project
 
+
 # Main GUI Window for the application
 class CsvEditor(QMainWindow):
     def __init__(self):
@@ -53,8 +54,11 @@ class CsvEditor(QMainWindow):
         # Load the layout file created in QT Creator
         # This is done to ensure that the UX remains consistent (better than writing manual code for UI)
         # and designed in optimal way using QT's own toolset
-        uic.loadUi('mainwindow.ui', self)
-
+        # define UI file paths
+        RESOURCE_PATH = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        mainwindowui_file = os.path.join(RESOURCE_PATH, "mainwindow.ui")
+        # uic.loadUi('mainwindow.ui', self)
+        uic.loadUi(mainwindowui_file, self)
         # Save the references of all tabs to avoid garbage collection
         # which leads to crash to opening of UI loaded tabs to avoid resource duplication
         self.csv_table_tab = self.main_document_tab
@@ -165,6 +169,8 @@ class CsvEditor(QMainWindow):
         Loads the file from file selector to a table
         closes any open file if any before opening new file
         """
+        # TODO: Improve the loading functionality for handling big csv files
+
         # Close any already opened file if any
         self.close_file()
 
@@ -606,6 +612,8 @@ class CsvEditor(QMainWindow):
             self.draw_plot(self.data_y_axis, self.data_x_axis, self.label_y_axis, self.label_x_axis)
 
     def plot(self, plotType):
+        # TODO: Handle the case where there are too many rows in data (label only few of them)
+        # TODO: Clarify with fossee about the exact data use case, add optimizations if data is numeric only
         """
         The parent function for setting parameters for plotting and calling the draw function to render the plot
         :param plotType: defines which type of plot is to be rendered
