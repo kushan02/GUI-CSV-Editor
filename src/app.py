@@ -56,8 +56,7 @@ class CsvEditor(QMainWindow):
         # and designed in optimal way using QT's own toolset
         # define UI file paths
         RESOURCE_PATH = os.path.dirname(__file__)  # <-- absolute dir the script is in
-        mainwindowui_file = os.path.join(RESOURCE_PATH, "mainwindow.ui")
-        # uic.loadUi('mainwindow.ui', self)
+        mainwindowui_file = os.path.join(RESOURCE_PATH, "ui/mainwindow.ui")
         uic.loadUi(mainwindowui_file, self)
         # Save the references of all tabs to avoid garbage collection
         # which leads to crash to opening of UI loaded tabs to avoid resource duplication
@@ -743,7 +742,11 @@ class CsvEditor(QMainWindow):
 class ColumnLayoutDialog(QDialog):
     def __init__(self):
         super(ColumnLayoutDialog, self).__init__()
-        uic.loadUi('contentlayoutdialog.ui', self)
+
+        # define UI file paths
+        RESOURCE_PATH = os.path.dirname(__file__)  # <-- absolute dir the script is in
+        contentlayoutdialogui_file = os.path.join(RESOURCE_PATH, "ui/contentlayoutdialog.ui")
+        uic.loadUi(contentlayoutdialogui_file, self)
 
         self.visible_headers_list = []
 

@@ -20,7 +20,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>icons/app_icon.png</normaloff>icons/app_icon.png</iconset>
+    <normaloff>../icons/app_icon.png</normaloff>../icons/app_icon.png</iconset>
   </property>
   <property name="styleSheet">
    <string notr="true"/>
@@ -260,7 +260,7 @@ width:300px;</string>
                 </property>
                 <property name="icon">
                  <iconset>
-                  <normaloff>icons/app_icon_bw.png</normaloff>icons/app_icon_bw.png</iconset>
+                  <normaloff>../icons/app_icon_bw.png</normaloff>../icons/app_icon_bw.png</iconset>
                 </property>
                </widget>
               </item>
@@ -560,7 +560,7 @@ border-color: transparent #ccc transparent transparent
   <action name="action_toolbar_add_data">
    <property name="icon">
     <iconset>
-     <normaloff>icons/add_icon.png</normaloff>icons/add_icon.png</iconset>
+     <normaloff>../icons/add_icon.png</normaloff>../icons/add_icon.png</iconset>
    </property>
    <property name="text">
     <string>Add Data</string>
@@ -572,7 +572,7 @@ border-color: transparent #ccc transparent transparent
   <action name="action_toolbar_delete_selected">
    <property name="icon">
     <iconset>
-     <normaloff>icons/delete_icon.png</normaloff>icons/delete_icon.png</iconset>
+     <normaloff>../icons/delete_icon.png</normaloff>../icons/delete_icon.png</iconset>
    </property>
    <property name="text">
     <string>Delete Selected</string>
@@ -584,7 +584,7 @@ border-color: transparent #ccc transparent transparent
   <action name="action_toolbar_plot_scatter_points">
    <property name="icon">
     <iconset>
-     <normaloff>icons/scatter_plot_icon.png</normaloff>icons/scatter_plot_icon.png</iconset>
+     <normaloff>../icons/scatter_plot_icon.png</normaloff>../icons/scatter_plot_icon.png</iconset>
    </property>
    <property name="text">
     <string>Plot Scatter Points</string>
@@ -596,7 +596,7 @@ border-color: transparent #ccc transparent transparent
   <action name="action_toolbar_plot_scatter_points_lines">
    <property name="icon">
     <iconset>
-     <normaloff>icons/scatter_line_plot_icon.png</normaloff>icons/scatter_line_plot_icon.png</iconset>
+     <normaloff>../icons/scatter_line_plot_icon.png</normaloff>../icons/scatter_line_plot_icon.png</iconset>
    </property>
    <property name="text">
     <string>Plot Scatter Points with Smooth Lines</string>
@@ -608,7 +608,7 @@ border-color: transparent #ccc transparent transparent
   <action name="action_toolbar_plot_lines">
    <property name="icon">
     <iconset>
-     <normaloff>icons/line_plot_icon.png</normaloff>icons/line_plot_icon.png</iconset>
+     <normaloff>../icons/line_plot_icon.png</normaloff>../icons/line_plot_icon.png</iconset>
    </property>
    <property name="text">
     <string>Plot Lines</string>
@@ -620,7 +620,7 @@ border-color: transparent #ccc transparent transparent
   <action name="action_toolbar_save_file">
    <property name="icon">
     <iconset>
-     <normaloff>icons/save_icon.png</normaloff>icons/save_icon.png</iconset>
+     <normaloff>../icons/save_icon.png</normaloff>../icons/save_icon.png</iconset>
    </property>
    <property name="text">
     <string>Save File</string>
@@ -635,7 +635,7 @@ border-color: transparent #ccc transparent transparent
   <action name="action_toolbar_open_file">
    <property name="icon">
     <iconset>
-     <normaloff>icons/open_file_icon.png</normaloff>icons/open_file_icon.png</iconset>
+     <normaloff>../icons/open_file_icon.png</normaloff>../icons/open_file_icon.png</iconset>
    </property>
    <property name="text">
     <string>Open CSV File</string>
@@ -670,7 +670,7 @@ border-color: transparent #ccc transparent transparent
   <action name="action_toolbar_save_plot_png">
    <property name="icon">
     <iconset>
-     <normaloff>icons/save_plot_png_icon.png</normaloff>icons/save_plot_png_icon.png</iconset>
+     <normaloff>../icons/save_plot_png_icon.png</normaloff>../icons/save_plot_png_icon.png</iconset>
    </property>
    <property name="text">
     <string>Save Plot PNG</string>
