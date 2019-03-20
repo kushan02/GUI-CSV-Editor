@@ -30,9 +30,12 @@ The below code uses PEP 8 style guide for Python
 
 """
 
+from datetime import datetime
+
 from PyQt5 import uic
+from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidgetItem, QDialog, \
-    QMessageBox, QVBoxLayout, QCheckBox
+    QMessageBox, QVBoxLayout, QCheckBox, QProgressDialog
 import os
 import sys
 import csv
@@ -40,10 +43,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from scipy.interpolate import make_interp_spline  # Below two libraries are used to plot the smooth curve
 import numpy as np
-
-
-# TODO: Refactor the code to make it efficient and more readable
-# TODO: Add requirements.txt file to project
 
 
 # Main GUI Window for the application
@@ -163,12 +162,26 @@ class CsvEditor(QMainWindow):
         # Close file function
         self.action_close_file.triggered.connect(self.close_file)
 
+    # Threaded functions for multithreading the loading
+
+    def on_finish(self):
+        # self.button.setEnabled(True)
+        self.thread.quit()
+
+    def update_progress(self, value):
+        # print(value, str(datetime.now()))
+        self.progress.setValue(value)
+
+    def set_maximum_progress_value(self, max_value):
+        print("MAX VALUE = ", max_value, str(datetime.now()))
+        self.progress.setMaximum(max_value)
+        self.progress.setValue(0)
+
     def load_csv(self):
         """
         Loads the file from file selector to a table
         closes any open file if any before opening new file
         """
-        # TODO: Improve the loading functionality for handling big csv files
 
         # Close any already opened file if any
         self.close_file()
@@ -184,41 +197,35 @@ class CsvEditor(QMainWindow):
 
         # Proceed if and only if a valid file is selected and the file dialog is not cancelled
         if csv_file_path[0]:
-
             # Get only the file name from path. eg. 'data_file.csv'
             filepath = os.path.normpath(csv_file_path[0])
             filename = filepath.split(os.sep)
             self.csv_file_name = filename[-1]
 
-            with open(csv_file_path[0], newline='') as csv_file:
+            # self.progress = QProgressDialog("Progress", "cancel", 0, 1)
+            self.progress = QProgressDialog("Reading Rows", None, 0, 5, self)
+            # self.progress.setMaximum(36633)
+            # self.progress.show()
 
-                self.csv_data_table.setRowCount(0)
-                self.csv_data_table.setColumnCount(0)
+            # with open(self.csv_file_path[0], newline='') as csv_file:
+            #     # self.progress.setMaximum(sum(1 for line in csv_file))
+            #     print(sum(1 for line in csv_file))
 
-                csv_file_read = csv.reader(csv_file, delimiter=',', quotechar='|')
+            self.worker = CsvLoaderWorker(csv_file_path=csv_file_path, csv_data_table=self.csv_data_table,
+                                          column_headers=self.column_headers,
+                                          column_headers_all=self.column_headers_all)
+            self.thread = QThread()
+            self.worker.moveToThread(self.thread)
+            self.worker.workRequested.connect(self.thread.start)
+            self.thread.started.connect(self.worker.process_loading_file)
+            self.worker.finished.connect(self.on_finish)
 
-                # Fetch the column headers and move the iterator to actual data
-                self.column_headers = next(csv_file_read)
+            self.worker.relay.connect(self.update_progress)
+            self.worker.progress_max.connect(self.set_maximum_progress_value)
+            self.worker.update_bottom_toolbar.connect(self.set_bottom_toolbar_info)
 
-                # A backup to keep a list of all the headers to toogle their view later
-                self.column_headers_all = self.column_headers[:]
-
-                for row_data in csv_file_read:
-                    row = self.csv_data_table.rowCount()
-                    self.csv_data_table.insertRow(row)
-                    self.csv_data_table.setColumnCount(len(row_data))
-                    for column, stuff in enumerate(row_data):
-                        item = QTableWidgetItem(stuff)
-                        self.csv_data_table.setItem(row, column, item)
-
-                self.csv_data_table.setHorizontalHeaderLabels(self.column_headers)
-
-            # Set WordWrap to True to make the cells change height according to content
-            # Currently set it to false as it looks very decent and makes cell size uniform throughout
-            self.csv_data_table.setWordWrap(False)
-            # Uncomment below line to stretch to fill the column width according to content
-            # self.csv_data_table.resizeColumnsToContents()
-            self.csv_data_table.resizeRowsToContents()
+            self.progress.setValue(0)
+            self.worker.request_work()
 
             self.check_cell_change = True
 
@@ -231,8 +238,6 @@ class CsvEditor(QMainWindow):
             self.action_add_data.setEnabled(True)
             self.action_toolbar_add_data.setEnabled(True)
             self.action_close_file.setEnabled(True)
-
-            self.set_bottom_toolbar_info()
 
     def add_blank_data_row(self):
         """
@@ -301,6 +306,9 @@ class CsvEditor(QMainWindow):
             r = cell.row()
             c = cell.column()
             self.csv_data_table.item(r, c).setText('')
+
+        # update the bottom toolbar to reflect the changes
+        self.set_bottom_toolbar_info()
 
     def open_column_layout_dialog(self):
         """
@@ -392,6 +400,9 @@ class CsvEditor(QMainWindow):
 
         self.column_headers_all = []
         self.column_headers = []
+
+        # Clear the populated table
+        self.csv_data_table.setRowCount(0)
 
         # Remove plot and file page tab
         try:
@@ -789,8 +800,74 @@ class ColumnLayoutDialog(QDialog):
                 self.visible_headers_list.append(check_box_list[loop].text())
 
 
+class CsvLoaderWorker(QObject):
+    workRequested = pyqtSignal()
+    finished = pyqtSignal()
+    relay = pyqtSignal(int)
+    progress_max = pyqtSignal(int)
+    update_bottom_toolbar = pyqtSignal()
+
+    def __init__(self, csv_file_path, csv_data_table, column_headers, column_headers_all, parent=None):
+        super(CsvLoaderWorker, self).__init__(parent)
+        self.csv_file_path = csv_file_path
+        self.csv_data_table = csv_data_table
+        self.column_headers = column_headers
+        self.column_headers_all = column_headers_all
+
+        # TODO: Fix bug for show/hide columns
+
+    def request_work(self):
+        self.workRequested.emit()
+
+    def process_loading_file(self):
+
+        # Open the file once to get idea of the total rowcount to display progress
+        with open(self.csv_file_path[0], newline='') as csv_file:
+            self.progress_max.emit(len(csv_file.readlines()) - 2)
+
+        with open(self.csv_file_path[0], newline='') as csv_file:
+
+            self.csv_data_table.setRowCount(0)
+            self.csv_data_table.setColumnCount(0)
+
+            csv_file_read = csv.reader(csv_file, delimiter=',', quotechar='|')
+
+            # Fetch the column headers and move the iterator to actual data
+            self.column_headers = next(csv_file_read)
+
+            # self.progress_max.emit(sum(1 for row in csv_file_read))
+
+            # A backup to keep a list of all the headers to toogle their view later
+            self.column_headers_all = self.column_headers[:]
+
+            for row_data in csv_file_read:
+
+                self.relay.emit(self.csv_data_table.rowCount())
+
+                row = self.csv_data_table.rowCount()
+                self.csv_data_table.insertRow(row)
+                self.csv_data_table.setColumnCount(len(row_data))
+                for column, stuff in enumerate(row_data):
+                    item = QTableWidgetItem(stuff)
+                    self.csv_data_table.setItem(row, column, item)
+
+            self.csv_data_table.setHorizontalHeaderLabels(self.column_headers)
+
+        # Set WordWrap to True to make the cells change height according to content
+        # Currently set it to false as it looks very decent and makes cell size uniform throughout
+        self.csv_data_table.setWordWrap(False)
+        # Uncomment below line to stretch to fill the column width according to content
+        # self.csv_data_table.resizeColumnsToContents()
+        self.csv_data_table.resizeRowsToContents()
+
+        # Update the bottom toolbar to reflect changes
+        self.update_bottom_toolbar.emit()
+        self.finished.emit()
+
+
 if __name__ == '__main__':
     # Run the application
     app = QApplication(sys.argv)
     window = CsvEditor()
+    window.show()
     sys.exit(app.exec_())
