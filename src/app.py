@@ -35,7 +35,7 @@ from datetime import datetime
 from PyQt5 import uic, QtCore
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidgetItem, QDialog, \
-    QMessageBox, QVBoxLayout, QCheckBox, QProgressDialog
+    QMessageBox, QVBoxLayout, QCheckBox, QProgressDialog, QInputDialog, QLineEdit
 import os
 import sys
 import csv
@@ -70,6 +70,7 @@ class CsvEditor(QMainWindow):
         self.action_column_layout.setEnabled(False)
         # Disable add data option and enable only when csv is loaded
         self.action_add_data.setEnabled(False)
+        self.action_add_column.setEnabled(False)
         self.action_toolbar_add_data.setEnabled(False)
         self.action_edit_data.setEnabled(False)
         self.action_delete_selected.setEnabled(False)
@@ -151,6 +152,7 @@ class CsvEditor(QMainWindow):
         # Add data function
         self.action_add_data.triggered.connect(self.add_blank_data_row)
         self.action_toolbar_add_data.triggered.connect(self.add_blank_data_row)
+        self.action_add_column.triggered.connect(self.add_blank_data_column)
 
         # Delete data function
         self.action_toolbar_delete_selected.triggered.connect(self.delete_selection)
@@ -203,7 +205,6 @@ class CsvEditor(QMainWindow):
             self.loading_progress = QProgressDialog("Reading Rows. Please wait...", None, 0, 100, self)
             self.loading_progress.setWindowTitle("Loading CSV File...")
             self.loading_progress.setCancelButton(None)
-            # self.loading_progress.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
 
             # enable custom window hint
             self.loading_progress.setWindowFlags(self.loading_progress.windowFlags() | QtCore.Qt.CustomizeWindowHint)
@@ -216,9 +217,11 @@ class CsvEditor(QMainWindow):
             self.loading_worker = CsvLoaderWorker(csv_file_path=csv_file_path, csv_data_table=self.csv_data_table,
                                                   column_headers=self.column_headers,
                                                   column_headers_all=self.column_headers_all)
+
             self.loading_thread = QThread()
             # Set higher priority to the GUI Thread so UI remains a bit smoother
             QThread.currentThread().setPriority(QThread.HighPriority)
+
             self.loading_worker.moveToThread(self.loading_thread)
             self.loading_worker.workRequested.connect(self.loading_thread.start)
             self.loading_thread.started.connect(self.loading_worker.process_loading_file)
@@ -240,6 +243,7 @@ class CsvEditor(QMainWindow):
             # Enable Column Layout menu option
             self.action_column_layout.setEnabled(True)
             self.action_add_data.setEnabled(True)
+            self.action_add_column.setEnabled(True)
             self.action_toolbar_add_data.setEnabled(True)
             self.action_close_file.setEnabled(True)
 
@@ -253,6 +257,34 @@ class CsvEditor(QMainWindow):
         for empty_col in range(0, column_count):
             item = QTableWidgetItem('')
             self.csv_data_table.setItem(last_row_count, empty_col, item)
+
+    def add_blank_data_column(self):
+        """
+        Adds a blank column of data to the table
+        """
+
+        header_title, ok_pressed = QInputDialog.getText(self, "Add Column", "Enter heading for the column:",
+                                                        QLineEdit.Normal, "")
+        if ok_pressed and header_title != '':
+            # print(header_title)
+
+            default_value, set_default_pressed = QInputDialog.getText(self, "Set Default Value",
+                                                                      "Enter default value to set for column if any:",
+                                                                      QLineEdit.Normal, "")
+
+            row_count = self.csv_data_table.rowCount()
+            last_column_count = self.csv_data_table.columnCount()
+            self.csv_data_table.insertColumn(last_column_count)
+            for empty_row in range(0, row_count):
+                item = QTableWidgetItem(default_value)
+                self.csv_data_table.setItem(empty_row, last_column_count, item)
+
+            # TODO: fix untraced bug present in show/hide columns
+            self.column_headers.append(header_title)
+            self.column_headers_all.append(header_title)
+            # print(self.column_headers)
+            # print(self.column_headers_all)
+            self.csv_data_table.setHorizontalHeaderLabels(self.column_headers)
 
     def edit_current_cell(self):
         """
@@ -407,6 +439,7 @@ class CsvEditor(QMainWindow):
         # Disable Column Layout menu option
         self.action_column_layout.setEnabled(False)
         self.action_add_data.setEnabled(False)
+        self.action_add_column.setEnabled(False)
         self.column_visibility_dialog_reference = None
         # Disable other file related options
         self.action_toolbar_add_data.setEnabled(False)
@@ -432,6 +465,7 @@ class CsvEditor(QMainWindow):
         self.action_column_layout.setEnabled(False)
         # Disable add data option and enable only when csv is loaded
         self.action_add_data.setEnabled(False)
+        self.action_add_column.setEnabled(False)
         self.action_toolbar_add_data.setEnabled(False)
         self.action_edit_data.setEnabled(False)
         self.action_delete_selected.setEnabled(False)
