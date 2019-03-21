@@ -32,7 +32,7 @@ The below code uses PEP 8 style guide for Python
 
 from datetime import datetime
 
-from PyQt5 import uic
+from PyQt5 import uic, QtCore
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidgetItem, QDialog, \
     QMessageBox, QVBoxLayout, QCheckBox, QProgressDialog
@@ -164,13 +164,14 @@ class CsvEditor(QMainWindow):
 
     # Threaded functions for multi threading the loading for handling large files
     def on_loading_finish(self):
+        # Change the cursor back to normal
+        QApplication.restoreOverrideCursor()
         self.loading_thread.quit()
 
     def update_loading_progress(self, value):
         self.loading_progress.setValue(value)
 
     def set_maximum_progress_value(self, max_value):
-        print("MAX VALUE = ", max_value, str(datetime.now()))
         self.loading_progress.setMaximum(max_value)
         self.loading_progress.setValue(0)
 
@@ -199,14 +200,25 @@ class CsvEditor(QMainWindow):
             filename = filepath.split(os.sep)
             self.csv_file_name = filename[-1]
 
-            self.loading_progress = QProgressDialog("Reading Rows", None, 0, 5, self)
+            self.loading_progress = QProgressDialog("Reading Rows. Please wait...", None, 0, 100, self)
             self.loading_progress.setWindowTitle("Loading CSV File...")
             self.loading_progress.setCancelButton(None)
+            # self.loading_progress.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
+
+            # enable custom window hint
+            self.loading_progress.setWindowFlags(self.loading_progress.windowFlags() | QtCore.Qt.CustomizeWindowHint)
+            # disable (but not hide) close button
+            self.loading_progress.setWindowFlags(self.loading_progress.windowFlags() & ~QtCore.Qt.WindowCloseButtonHint)
+
+            # Show waiting cursor till the time file is being processed
+            QApplication.setOverrideCursor(QtCore.Qt.WaitCursor)
 
             self.loading_worker = CsvLoaderWorker(csv_file_path=csv_file_path, csv_data_table=self.csv_data_table,
                                                   column_headers=self.column_headers,
                                                   column_headers_all=self.column_headers_all)
             self.loading_thread = QThread()
+            # Set higher priority to the GUI Thread so UI remains a bit smoother
+            QThread.currentThread().setPriority(QThread.HighPriority)
             self.loading_worker.moveToThread(self.loading_thread)
             self.loading_worker.workRequested.connect(self.loading_thread.start)
             self.loading_thread.started.connect(self.loading_worker.process_loading_file)
@@ -775,7 +787,6 @@ class ColumnLayoutDialog(QDialog):
         # TODO: On hidding the columns, the bottom info bar should reflect the changes
         # It doesnot work because it uses columnCount() which ignores the state of columns
 
-        print("------------------------------------")
         layout = QVBoxLayout()
 
         for header in header_list:
