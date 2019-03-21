@@ -180,8 +180,6 @@ class CsvEditor(QMainWindow):
         closes any open file if any before opening new file
         """
 
-        # TODO: Fix the scrollbar UI
-
         # Close any already opened file if any
         self.close_file()
 
@@ -278,6 +276,16 @@ class CsvEditor(QMainWindow):
 
         # delete any fully selected column
         for col in selected_columns:
+            # Remove it from the show/hide modal too
+            header_value = self.csv_data_table.horizontalHeaderItem(col).text()
+            if header_value in self.column_headers_all:
+                self.column_headers_all.remove(header_value)
+            if header_value in self.column_headers:
+                self.column_headers.remove(header_value)
+            try:
+                self.column_visibility_dialog_reference.remove_header(header_value)
+            except:
+                pass
             self.csv_data_table.removeColumn(col)
 
         self.selected_columns.clear()
@@ -766,8 +774,12 @@ class ColumnLayoutDialog(QDialog):
         """
         # TODO: On hidding the columns, the bottom info bar should reflect the changes
         # It doesnot work because it uses columnCount() which ignores the state of columns
+
+        print("------------------------------------")
         layout = QVBoxLayout()
+
         for header in header_list:
+            print(header)
             check_box = QCheckBox(header)
             if self.visible_headers_list:
                 if header in self.visible_headers_list:
@@ -794,6 +806,10 @@ class ColumnLayoutDialog(QDialog):
         for loop in range(len(check_box_list)):
             if check_box_list[loop].isChecked():
                 self.visible_headers_list.append(check_box_list[loop].text())
+
+    def remove_header(self, header_title):
+        if header_title in self.visible_headers_list:
+            self.visible_headers_list.remove(header_title)
 
 
 class CsvLoaderWorker(QObject):

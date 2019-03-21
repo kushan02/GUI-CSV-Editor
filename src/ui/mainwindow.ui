@@ -28,8 +28,8 @@
   <widget class="QWidget" name="centralwidget">
    <property name="styleSheet">
     <string notr="true">QWidget{
-background-color: #fafafa;
-color: #383a42;
+background-color: rgb(255, 255, 255);
+color: #212121;
 }
 
 QPushButton{
@@ -47,38 +47,17 @@ border: 1px solid #cacaca
 
 QTableView::item{
 padding: 7px;
+font: 300 14px/18px Roboto,sans-serif;
 }
 
 QTableView::item:focus{
 padding: 0;
 }
 
+QScrollBar{
+background-color: #e5e5e5;
+}
 
-QScrollBar:horizontal {
-  border-color: rgb(227, 227, 227);
-  border-width: 1px;
-  border-style: solid;
-  background-color: rgb(240, 240, 240);
-    height: 15px;
-margin: 0px -21px 0 21px;
- }
-
- QScrollBar::handle:horizontal {
-    background-color: rgb(200, 200, 200);
- }
-
-
-QScrollBar:vertical {
-  border-color: rgb(227, 227, 227);
-  border-width: 1px;
-  border-style: solid;
-  background-color: rgb(240, 240, 240);
-margin: 21px 0px 21px 0px;
- }
-
- QScrollBar::handle:verticall {
-    background-color: rgb(200, 200, 200);
- }
 
 
 </string>
