@@ -171,9 +171,11 @@ class CsvEditor(QMainWindow):
         self.loading_thread.quit()
 
     def update_loading_progress(self, value):
+        print("reading row: ", value)
         self.loading_progress.setValue(value)
 
     def set_maximum_progress_value(self, max_value):
+        print(max_value)
         self.loading_progress.setMaximum(max_value)
         self.loading_progress.setValue(0)
 
@@ -671,7 +673,8 @@ class CsvEditor(QMainWindow):
 
     def plot(self, plotType):
         # TODO: Handle the case where there are too many rows in data (label only few of them)
-        # TODO: Clarify with fossee about the exact data use case, add optimizations if data is numeric only
+        # TODO: Perform optimizations for numerical data only with fallback support incase data is not numerical
+
         """
         The parent function for setting parameters for plotting and calling the draw function to render the plot
         :param plotType: defines which type of plot is to be rendered
@@ -904,10 +907,15 @@ class CsvLoaderWorker(QObject):
                 # A backup to keep a list of all the headers to toogle their view later
                 self.column_headers_all.append(header)
 
+            # TODO: Increase the reading speed by decreasing load on actual table popluation
+
+            # self.csv_data_table.hide()
+
             for row_data in csv_file_read:
 
                 self.relay.emit(self.csv_data_table.rowCount())
-
+                # self.relay.emit(self.x)
+                # self.x = self.x + 1
                 row = self.csv_data_table.rowCount()
                 self.csv_data_table.insertRow(row)
                 self.csv_data_table.setColumnCount(len(row_data))
