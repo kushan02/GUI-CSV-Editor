@@ -109,7 +109,7 @@ class CsvEditor(QMainWindow):
         self.show()
 
     def set_connections(self):
-        # Column layout dialog function
+        # show/hide column layout dialog function
         self.action_column_layout.triggered.connect(self.open_column_layout_dialog)
 
         # Connect cell change function
@@ -162,26 +162,25 @@ class CsvEditor(QMainWindow):
         # Close file function
         self.action_close_file.triggered.connect(self.close_file)
 
-    # Threaded functions for multithreading the loading
+    # Threaded functions for multi threading the loading for handling large files
+    def on_loading_finish(self):
+        self.loading_thread.quit()
 
-    def on_finish(self):
-        # self.button.setEnabled(True)
-        self.thread.quit()
-
-    def update_progress(self, value):
-        # print(value, str(datetime.now()))
-        self.progress.setValue(value)
+    def update_loading_progress(self, value):
+        self.loading_progress.setValue(value)
 
     def set_maximum_progress_value(self, max_value):
         print("MAX VALUE = ", max_value, str(datetime.now()))
-        self.progress.setMaximum(max_value)
-        self.progress.setValue(0)
+        self.loading_progress.setMaximum(max_value)
+        self.loading_progress.setValue(0)
 
     def load_csv(self):
         """
         Loads the file from file selector to a table
         closes any open file if any before opening new file
         """
+
+        # TODO: Fix the scrollbar UI
 
         # Close any already opened file if any
         self.close_file()
@@ -202,30 +201,25 @@ class CsvEditor(QMainWindow):
             filename = filepath.split(os.sep)
             self.csv_file_name = filename[-1]
 
-            # self.progress = QProgressDialog("Progress", "cancel", 0, 1)
-            self.progress = QProgressDialog("Reading Rows", None, 0, 5, self)
-            # self.progress.setMaximum(36633)
-            # self.progress.show()
+            self.loading_progress = QProgressDialog("Reading Rows", None, 0, 5, self)
+            self.loading_progress.setWindowTitle("Loading CSV File...")
+            self.loading_progress.setCancelButton(None)
 
-            # with open(self.csv_file_path[0], newline='') as csv_file:
-            #     # self.progress.setMaximum(sum(1 for line in csv_file))
-            #     print(sum(1 for line in csv_file))
+            self.loading_worker = CsvLoaderWorker(csv_file_path=csv_file_path, csv_data_table=self.csv_data_table,
+                                                  column_headers=self.column_headers,
+                                                  column_headers_all=self.column_headers_all)
+            self.loading_thread = QThread()
+            self.loading_worker.moveToThread(self.loading_thread)
+            self.loading_worker.workRequested.connect(self.loading_thread.start)
+            self.loading_thread.started.connect(self.loading_worker.process_loading_file)
+            self.loading_worker.finished.connect(self.on_loading_finish)
 
-            self.worker = CsvLoaderWorker(csv_file_path=csv_file_path, csv_data_table=self.csv_data_table,
-                                          column_headers=self.column_headers,
-                                          column_headers_all=self.column_headers_all)
-            self.thread = QThread()
-            self.worker.moveToThread(self.thread)
-            self.worker.workRequested.connect(self.thread.start)
-            self.thread.started.connect(self.worker.process_loading_file)
-            self.worker.finished.connect(self.on_finish)
+            self.loading_worker.relay.connect(self.update_loading_progress)
+            self.loading_worker.progress_max.connect(self.set_maximum_progress_value)
+            self.loading_worker.update_bottom_toolbar.connect(self.set_bottom_toolbar_info)
 
-            self.worker.relay.connect(self.update_progress)
-            self.worker.progress_max.connect(self.set_maximum_progress_value)
-            self.worker.update_bottom_toolbar.connect(self.set_bottom_toolbar_info)
-
-            self.progress.setValue(0)
-            self.worker.request_work()
+            self.loading_progress.setValue(0)
+            self.loading_worker.request_work()
 
             self.check_cell_change = True
 
@@ -770,6 +764,8 @@ class ColumnLayoutDialog(QDialog):
         :param header_list: The list of all the columns in the table
         :param visible_list: The list of currently visible colummns in the table
         """
+        # TODO: On hidding the columns, the bottom info bar should reflect the changes
+        # It doesnot work because it uses columnCount() which ignores the state of columns
         layout = QVBoxLayout()
         for header in header_list:
             check_box = QCheckBox(header)
@@ -814,12 +810,18 @@ class CsvLoaderWorker(QObject):
         self.column_headers = column_headers
         self.column_headers_all = column_headers_all
 
-        # TODO: Fix bug for show/hide columns
-
     def request_work(self):
+        """
+        Signal to begin the loading process
+        """
         self.workRequested.emit()
 
     def process_loading_file(self):
+        """
+        Starts the thread for populating table from the file without blocking the main UI thread
+        """
+        column_headers = []
+        column_headers_all = []
 
         # Open the file once to get idea of the total rowcount to display progress
         with open(self.csv_file_path[0], newline='') as csv_file:
@@ -833,12 +835,13 @@ class CsvLoaderWorker(QObject):
             csv_file_read = csv.reader(csv_file, delimiter=',', quotechar='|')
 
             # Fetch the column headers and move the iterator to actual data
-            self.column_headers = next(csv_file_read)
+            column_headers = next(csv_file_read)
 
-            # self.progress_max.emit(sum(1 for row in csv_file_read))
-
-            # A backup to keep a list of all the headers to toogle their view later
-            self.column_headers_all = self.column_headers[:]
+            # Reflect back the changes in the reference to the column headers
+            for header in column_headers:
+                self.column_headers.append(header)
+                # A backup to keep a list of all the headers to toogle their view later
+                self.column_headers_all.append(header)
 
             for row_data in csv_file_read:
 
