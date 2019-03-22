@@ -29,9 +29,6 @@ Features:
 The below code uses PEP 8 style guide for Python
 
 """
-
-from datetime import datetime
-
 from PyQt5 import uic, QtCore
 from PyQt5.QtCore import QObject, pyqtSignal, QThread
 from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog, QTableWidgetItem, QDialog, \
@@ -710,7 +707,60 @@ class CsvEditor(QMainWindow):
         # Set plot type (1,2,3 => order according to scatter, scatter-line, line)
         self.plotType = plotType
 
+        # Convert the data to np arrays if it is purely numerical
+        try:
+            for i in range(0, len(self.data_x_axis)):
+                if self.data_x_axis[i] == '':
+                    self.data_x_axis[i] = 0
+                if self.data_y_axis[i] == '':
+                    self.data_y_axis[i] = 0
+
+                self.data_x_axis[i] = self.coerce_str_to_number(self.data_x_axis[i])
+                self.data_y_axis[i] = self.coerce_str_to_number(self.data_y_axis[i])
+
+            self.data_x_axis = np.array(self.data_x_axis)
+            self.data_y_axis = np.array(self.data_y_axis)
+
+            print(self.data_x_axis)
+            print(self.data_y_axis)
+
+            print("In specialized plotting")
+
+        except:
+            pass
+            # Dont attempt the conversion, directly plot
+            print("In generic plotting")
+
         self.draw_plot(self.data_x_axis, self.data_y_axis, self.label_x_axis, self.label_y_axis)
+
+    # Made some modifications in function from here to suit needs
+    # https://stackoverflow.com/a/15357477/4126370
+    def isfloat(self, x):
+        try:
+            a = float(x)
+        except ValueError:
+            return False
+        else:
+            return True
+
+    def isint(self, x):
+        try:
+            a = float(x)
+            b = int(a)
+        except ValueError:
+            return False
+        else:
+            return a == b
+
+    def coerce_str_to_number(self, x):
+        if self.isint(x):
+            x = int(x)
+            return x
+        elif self.isfloat(x):
+            x = float(x)
+            return x
+        else:
+            raise ("cant coerce")
 
     def draw_plot(self, data_x_axis, data_y_axis, label_x_axis, label_y_axis):
         """
@@ -720,6 +770,7 @@ class CsvEditor(QMainWindow):
         :param label_x_axis: text for label for x axis
         :param label_y_axis: text for label for y axis
         """
+
         # Flipped tells us whether to invert the current x, y axis
         self.figure.clear()
 
@@ -732,47 +783,35 @@ class CsvEditor(QMainWindow):
         ax = self.figure.add_subplot(111)
 
         # Add another argument fontsize = 10 to change the fontsize of the labels
-
         ax.set_xlabel(label_x_axis)
         ax.set_ylabel(label_y_axis)
 
+        ax.xaxis.set_major_locator(plt.MaxNLocator(10))
+        ax.yaxis.set_major_locator(plt.MaxNLocator(10))
+
         if self.plotType == 1:
+            ax.scatter(data_x_axis, data_y_axis)
 
-            ax.plot(data_x_axis, data_y_axis)
         elif self.plotType == 2:
-
-            # SMOOTH CURVE CURRENTLY WORKS ONLY WIHT INTEGRAL VALUES
-            # TODO: Understand in a better way what exactly is expected in smooth curve plotting
-
-            # Try block is added as as of now smoth line can be plotting only if the data consists entirely of numeric value
-
+            # SMOOTH CURVE CURRENTLY WORKS ONLY WITH INTEGRAL VALUES
             # Smoothen the curve points
             try:
-                for i in range(0, len(data_x_axis)):
-                    data_x_axis[i] = int(data_x_axis[i])
-                    data_y_axis[i] = int(data_y_axis[i])
-
-                data_x_axis = sorted(data_x_axis)
-                data_y_axis = sorted(data_y_axis)
-
-                T = np.array(data_x_axis)
-                power = np.array(data_y_axis)
+                T = data_x_axis
+                power = data_y_axis
 
                 xnew = np.linspace(T.min(), T.max(),
                                    300)  # 300 represents number of points to make between T.min and T.max
 
                 spl = make_interp_spline(T, power, k=3)  # BSpline object
                 power_smooth = spl(xnew)
-
-                ax.plot(xnew, power_smooth)
+                ax.scatter(data_x_axis, data_y_axis)
+                ax.plot(xnew, power_smooth, marker='o')
             except:
                 # Switch to normal plot if the data is not purely numeric in which case a smooth curve is not possible
-                ax.plot(data_x_axis, data_y_axis)
-
-            # ax.plot(data_x_axis, data_y_axis)
+                ax.plot(data_x_axis, data_y_axis, marker='o')
 
         else:
-            ax.scatter(data_x_axis, data_y_axis)
+            ax.plot(data_x_axis, data_y_axis)
 
         self.canvas.draw()
         # Enable the option as plot is now drawn
