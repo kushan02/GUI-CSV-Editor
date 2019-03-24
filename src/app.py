@@ -669,15 +669,11 @@ class CsvEditor(QMainWindow):
             self.draw_plot(self.data_y_axis, self.data_x_axis, self.label_y_axis, self.label_x_axis)
 
     def plot(self, plotType):
-        # TODO: Handle the case where there are too many rows in data (label only few of them)
-        # TODO: Perform optimizations for numerical data only with fallback support incase data is not numerical
-
         """
         The parent function for setting parameters for plotting and calling the draw function to render the plot
         :param plotType: defines which type of plot is to be rendered
         """
         # Build plotting data
-        # TODO: Try to improve time complexity of the building up of plotting data
         self.data_x_axis = []
         self.data_y_axis = []
         for i in range(0, self.csv_data_table.rowCount()):
@@ -946,7 +942,7 @@ class CsvLoaderWorker(QObject):
                 # A backup to keep a list of all the headers to toogle their view later
                 self.column_headers_all.append(header)
 
-            # TODO: Increase the reading speed by decreasing load on actual table popluation
+            # TODO: Increase the reading speed by decreasing load on actual table population
 
             # self.csv_data_table.hide()
 
