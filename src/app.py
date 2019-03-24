@@ -161,6 +161,9 @@ class CsvEditor(QMainWindow):
         # Close file function
         self.action_close_file.triggered.connect(self.close_file)
 
+        # Exit the app
+        self.action_exit.triggered.connect(self.closeEvent)
+
     # Threaded functions for multi threading the loading for handling large files
     def on_loading_finish(self):
         # Change the cursor back to normal
@@ -485,6 +488,7 @@ class CsvEditor(QMainWindow):
         """
         # If application is being closed directly prompt for saving modified file
         self.prompt_save_before_closing()
+        exit(0)
 
     # Helper functions
 
